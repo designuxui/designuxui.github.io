@@ -1148,8 +1148,8 @@ setLang('en');
 
 // ── BRIDGE AI CHAT ──
 // Groq API proxied via Cloudflare Worker
-const TG_BOT   = '8701746283:AAFYjihpEtODc6VyAMUWDOPlhRr1UIBLCRQ';
-const TG_CHAT  = '8545112416';
+// Telegram credentials stored in Cloudflare Worker Secrets
+// (BOT_TOKEN and CHAT_ID are in Worker env)
 
 let chatOpen = false;
 let chatHistory = [];
@@ -1329,10 +1329,10 @@ async function sendLeadToTelegram() {
   
   const text = `🤖 NEW LEAD FROM BRIDGE BOT\n\n📧 Email: ${userEmail}\n\n💬 Conversation:\n${summary}`;
   
-  await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, {
+  await fetch('https://bridge-groq-proxy.bridgework.workers.dev', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({chat_id: TG_CHAT, text: text})
+    body: JSON.stringify({ action: 'send_lead', text: text })
   });
 }
 
