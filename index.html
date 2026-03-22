@@ -350,6 +350,107 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
 </style>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+/* ── BRIDGE AI CHAT WIDGET ── */
+
+/* Tooltip */
+#chat-tooltip{position:fixed;bottom:7rem;right:1.8rem;background:rgba(8,7,6,.95);border:1px solid rgba(200,245,66,.2);border-radius:14px;padding:.85rem 1.1rem;max-width:210px;z-index:8998;opacity:0;transform:translateY(10px);transition:opacity .35s cubic-bezier(.16,1,.3,1),transform .35s cubic-bezier(.16,1,.3,1);pointer-events:none;backdrop-filter:blur(12px)}
+#chat-tooltip.show{opacity:1;transform:translateY(0);pointer-events:all}
+#chat-tooltip p{font-family:'DM Sans',sans-serif;font-size:.78rem;color:rgba(237,233,224,.8);line-height:1.5;margin:0}
+#chat-tooltip p span{color:#c8f542}
+#chat-tooltip::after{content:'';position:absolute;bottom:-5px;right:24px;width:9px;height:9px;background:rgba(8,7,6,.95);border-right:1px solid rgba(200,245,66,.2);border-bottom:1px solid rgba(200,245,66,.2);transform:rotate(45deg)}
+@media(max-width:768px){#chat-tooltip{right:1rem;bottom:5.6rem}}
+
+/* Bubble button */
+#chat-bubble{position:fixed;bottom:1.8rem;right:1.8rem;width:54px;height:54px;background:#c8f542;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9000;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+#chat-bubble:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(200,245,66,.35)}
+#chat-bubble:active{transform:scale(.96)}
+#chat-bubble svg{width:24px;height:24px;stroke:#080706;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+#chat-bubble .chat-close{display:none}
+#chat-bubble.open .chat-icon{display:none}
+#chat-bubble.open .chat-close{display:block}
+
+/* Chat window */
+#chat-window{position:fixed;bottom:5.2rem;right:1.8rem;width:358px;max-height:530px;background:#0a0908;border:1px solid rgba(237,233,224,.08);border-radius:20px;display:flex;flex-direction:column;z-index:8999;opacity:0;transform:translateY(20px) scale(.95);pointer-events:none;transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1);overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+#chat-window.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+
+/* Header */
+#chat-header{padding:.9rem 1.1rem;background:rgba(200,245,66,.04);border-bottom:1px solid rgba(237,233,224,.06);display:flex;align-items:center;gap:.8rem}
+#chat-header .ch-avatar{width:34px;height:34px;border-radius:50%;background:#c8f542;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Unbounded',sans-serif;font-weight:900;font-size:.62rem;color:#080706;letter-spacing:.05em}
+#chat-header .ch-info{flex:1}
+#chat-header .ch-title{font-family:'Unbounded',sans-serif;font-size:.68rem;font-weight:700;color:#ede9e0;letter-spacing:.1em}
+#chat-header .ch-status{display:flex;align-items:center;gap:.35rem;margin-top:.2rem}
+#chat-header .ch-dot{width:6px;height:6px;border-radius:50%;background:#c8f542;animation:pdot 2.2s ease infinite;flex-shrink:0}
+#chat-header .ch-sub{font-size:.6rem;color:rgba(237,233,224,.35);font-family:'DM Sans',sans-serif}
+
+/* Messages */
+#chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem;max-height:360px}
+#chat-messages::-webkit-scrollbar{width:3px}
+#chat-messages::-webkit-scrollbar-track{background:transparent}
+#chat-messages::-webkit-scrollbar-thumb{background:rgba(200,245,66,.15);border-radius:2px}
+.cm{max-width:82%;padding:.6rem .9rem;font-size:.8rem;line-height:1.6;font-family:'DM Sans',sans-serif;font-weight:300;animation:msgIn .25s cubic-bezier(.16,1,.3,1)}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.cm.bot{background:rgba(237,233,224,.06);color:#ede9e0;align-self:flex-start;border-radius:14px;border-bottom-left-radius:4px}
+.cm.user{background:#c8f542;color:#080706;align-self:flex-end;border-radius:14px;border-bottom-right-radius:4px;font-weight:400}
+.cm.typing{background:rgba(237,233,224,.06);align-self:flex-start;border-radius:14px;border-bottom-left-radius:4px;padding:.65rem 1rem}
+.typing-dots{display:flex;gap:5px;align-items:center}
+.typing-dots span{width:5px;height:5px;border-radius:50%;background:rgba(237,233,224,.35);animation:tdot 1.3s ease infinite}
+.typing-dots span:nth-child(2){animation-delay:.18s}
+.typing-dots span:nth-child(3){animation-delay:.36s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-5px);opacity:1}}
+
+/* Input area */
+#chat-input-area{padding:.75rem .9rem;border-top:1px solid rgba(237,233,224,.06);display:flex;gap:.5rem;align-items:flex-end;background:rgba(0,0,0,.2)}
+#chat-input{flex:1;background:rgba(237,233,224,.05);border:1px solid rgba(237,233,224,.1);border-radius:12px;padding:.6rem .85rem;color:#ede9e0;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;resize:none;height:38px;max-height:96px;overflow-y:auto;transition:border-color .2s,background .2s;line-height:1.5}
+#chat-input:focus{border-color:rgba(200,245,66,.35);background:rgba(200,245,66,.03)}
+#chat-input::placeholder{color:rgba(237,233,224,.22)}
+#chat-send{width:38px;height:38px;background:#c8f542;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s,transform .15s}
+#chat-send:hover{background:#d4ff50;transform:scale(1.05)}
+#chat-send:active{transform:scale(.95)}
+#chat-send svg{width:16px;height:16px;stroke:#080706;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+@media(max-width:768px){
+  #chat-window{width:calc(100vw - 2rem);right:1rem;bottom:4.8rem;max-height:72vh;border-radius:18px}
+  #chat-bubble{bottom:1.5rem;right:1rem;width:50px;height:50px}
+}
+
+#chat-bubble{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:#c8f542;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:9000;box-shadow:0 4px 24px rgba(200,245,66,.3);transition:transform .2s,box-shadow .2s}
+#chat-bubble:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(200,245,66,.5)}
+#chat-bubble svg{width:26px;height:26px;stroke:#080706;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#chat-bubble .chat-close{display:none}
+#chat-bubble.open .chat-icon{display:none}
+#chat-bubble.open .chat-close{display:block}
+#chat-window{position:fixed;bottom:5.5rem;right:2rem;width:360px;max-height:520px;background:#0f0e0d;border:1px solid rgba(200,245,66,.2);border-radius:16px;display:flex;flex-direction:column;z-index:8999;opacity:0;transform:translateY(16px) scale(.97);pointer-events:none;transition:opacity .25s,transform .25s;overflow:hidden}
+#chat-window.open{opacity:1;transform:translateY(0) scale(1);pointer-events:all}
+#chat-header{padding:1rem 1.2rem;border-bottom:1px solid rgba(237,233,224,.07);display:flex;align-items:center;gap:.7rem}
+#chat-header .ch-dot{width:8px;height:8px;border-radius:50%;background:#c8f542;animation:pdot 2.2s ease infinite;flex-shrink:0}
+#chat-header .ch-title{font-family:'Unbounded',sans-serif;font-size:.72rem;font-weight:700;color:#ede9e0;letter-spacing:.08em}
+#chat-header .ch-sub{font-size:.65rem;color:rgba(237,233,224,.45);margin-top:.1rem}
+#chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.7rem;max-height:340px}
+#chat-messages::-webkit-scrollbar{width:4px}
+#chat-messages::-webkit-scrollbar-track{background:transparent}
+#chat-messages::-webkit-scrollbar-thumb{background:rgba(200,245,66,.2);border-radius:2px}
+.cm{max-width:85%;padding:.65rem .9rem;border-radius:12px;font-size:.82rem;line-height:1.55;font-family:'DM Sans',sans-serif;font-weight:300}
+.cm.bot{background:rgba(237,233,224,.07);color:#ede9e0;align-self:flex-start;border-bottom-left-radius:4px}
+.cm.user{background:#c8f542;color:#080706;align-self:flex-end;border-bottom-right-radius:4px;font-weight:400}
+.cm.typing{background:rgba(237,233,224,.07);align-self:flex-start;padding:.65rem 1rem}
+.typing-dots{display:flex;gap:4px;align-items:center}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:rgba(237,233,224,.4);animation:tdot 1.2s ease infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+#chat-input-area{padding:.8rem;border-top:1px solid rgba(237,233,224,.07);display:flex;gap:.5rem}
+#chat-input{flex:1;background:rgba(237,233,224,.06);border:1px solid rgba(237,233,224,.12);border-radius:8px;padding:.6rem .9rem;color:#ede9e0;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;resize:none;height:40px;max-height:100px;overflow-y:auto;transition:border-color .2s}
+#chat-input:focus{border-color:rgba(200,245,66,.4)}
+#chat-input::placeholder{color:rgba(237,233,224,.3)}
+#chat-send{width:40px;height:40px;background:#c8f542;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+#chat-send:hover{background:#d4ff50}
+#chat-send svg{width:18px;height:18px;stroke:#080706;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:768px){
+  #chat-window{width:calc(100vw - 2rem);right:1rem;bottom:5rem;max-height:70vh}
+  #chat-bubble{bottom:1.5rem;right:1rem}
+}
+</style>
 </head>
   <body>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
@@ -583,6 +684,37 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
   <p>I help businesses improve conversion rates through UX audits, funnel optimization, and sales strategy. Based in Warsaw EU, working remotely worldwide. Specialised in product-led growth, revenue operations, and bridging the gap between design, product, and sales.</p>
 </div>
   <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dfc2d045f19b9e9',t:'MTc3NDA4NzkyMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+<!-- BRIDGE AI CHAT WIDGET -->
+<div id="chat-bubble" onclick="toggleChat()">
+  <svg class="chat-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <svg class="chat-close" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+</div>
+
+<div id="chat-tooltip">
+  <p>👋 Need help choosing <span>the right service?</span></p>
+</div>
+
+<div id="chat-window">
+  <div id="chat-header">
+    <div class="ch-avatar">B.</div>
+    <div class="ch-info">
+      <div class="ch-title">BRIDGE. Assistant</div>
+      <div class="ch-status">
+        <div class="ch-dot"></div>
+        <div class="ch-sub">Online · replies in seconds</div>
+      </div>
+    </div>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-area">
+    <textarea id="chat-input" placeholder="Ask me anything..." rows="1"></textarea>
+    <button id="chat-send" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
 </body>
 
     <script type="text/javascript">
@@ -1012,7 +1144,213 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePrivacy();});
 
 setLang('en');
 
-  </script>
+  
+
+// ── BRIDGE AI CHAT ──
+// Groq API proxied via Cloudflare Worker
+const TG_BOT   = '8701746283:AAFYjihpEtODc6VyAMUWDOPlhRr1UIBLCRQ';
+const TG_CHAT  = '8545112416';
+
+let chatOpen = false;
+let chatHistory = [];
+let userEmail = null;
+let leadSent = false;
+let awaitingEmail = false;
+
+const SYSTEM_PROMPT = `You are BRIDGE. Assistant — a smart, concise consultant for BRIDGE., a specialist agency.
+BRIDGE. specialises in: UX Strategy, Product Strategy, Conversion Rate Optimization, B2B Sales & CRM Systems.
+BRIDGE. works remotely worldwide. Clients: SaaS, eCommerce, B2B companies.
+
+YOUR GOAL: understand the visitor's product and problem, then collect their email to send a qualified lead to the BRIDGE. team.
+
+CONVERSATION FLOW:
+1. Greet warmly, ask what product or service their business offers (1 question only)
+2. Ask what specific problem they want to solve — focus on UX, conversion, sales, product strategy
+3. Based on their answers, briefly explain how BRIDGE. can help
+4. Ask for their email to connect them with the right specialist
+5. After getting email, confirm and close the conversation warmly
+
+WHAT TO COLLECT:
+- What product/service they sell or build
+- What problem they want to solve (low conversion, poor UX, weak sales pipeline, etc.)
+- Their email
+
+DO NOT ASK about team size, headcount, or company structure — it's not needed.
+
+RULES:
+- Keep replies SHORT — 2-4 sentences max
+- Ask ONE question per message
+- Be warm, professional, and direct
+- Never invent services BRIDGE. doesn't offer
+- Pricing: say BRIDGE. discusses it individually after understanding the project
+- Never use any personal names — always say "BRIDGE." or "our specialist"
+- LANGUAGE: respond in English always. If user writes in Polish → respond in Polish. Any other language → English.
+- After getting email, end the conversation gracefully. Never use any language other than English or Polish.
+
+TERMINATION RULES — immediately stop the conversation if:
+- User writes anything illegal, unethical, or related to illegal business
+- User is rude, offensive, or uses insults
+- User sends suspicious links (anything except an email address)
+- Topic is completely unrelated to UX, product, sales, or digital business
+In these cases respond ONLY with: "I'm only here to help with UX, product and sales topics. Have a great day! 👋" — then stop. Do not engage further, do not argue, do not send any lead to Telegram.`;
+
+function toggleChat() {
+  const win = document.getElementById('chat-window');
+  const btn = document.getElementById('chat-bubble');
+  chatOpen = !chatOpen;
+  win.classList.toggle('open', chatOpen);
+  btn.classList.toggle('open', chatOpen);
+  if (chatOpen && chatHistory.length === 0) {
+    setTimeout(() => addBotMessage("Hi! I'm BRIDGE. Assistant 👋 I help connect you with the right specialist. What business challenge are you dealing with right now?"), 400);
+  }
+  if (chatOpen) document.getElementById('chat-input').focus();
+}
+
+function addBotMessage(text) {
+  const msgs = document.getElementById('chat-messages');
+  const typing = document.createElement('div');
+  typing.className = 'cm typing';
+  typing.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    typing.remove();
+    const div = document.createElement('div');
+    div.className = 'cm bot';
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    chatHistory.push({role:'assistant', content:text});
+  }, 900);
+}
+
+function addUserMessage(text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'cm user';
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatHistory.push({role:'user', content:text});
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = '40px';
+  addUserMessage(text);
+
+  // Check if this looks like an email
+  if (awaitingEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) {
+    userEmail = text;
+    awaitingEmail = false;
+    if (!leadSent) {
+      leadSent = true;
+      sendLeadToTelegram();
+    }
+    addBotMessage("Perfect! I've sent your details to the BRIDGE. team. He'll review your case and get back to you personally. Good luck with your project! 🚀");
+    return;
+  }
+
+  // Check if email-like but awaiting not set - detect email in message
+  if (!userEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) {
+    userEmail = text;
+    if (!leadSent) {
+      leadSent = true;
+      sendLeadToTelegram();
+    }
+    addBotMessage("Perfect! I've sent your details to the BRIDGE. team. He'll review your case and get back to you personally. Good luck with your project! 🚀");
+    return;
+  }
+
+  try {
+    const response = await fetch('https://bridge-groq-proxy.bridgework.workers.dev', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 200,
+        messages: [
+          {role:'system', content: SYSTEM_PROMPT},
+          ...chatHistory
+        ]
+      })
+    });
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "Sorry, I had a small hiccup. Please try again.";
+    
+    // Check if bot triggered termination
+    if (reply.includes("Have a great day! 👋") || reply.includes("Miłego dnia! 👋")) {
+      addBotMessage(reply);
+      leadSent = true; // prevent any lead from being sent
+      document.getElementById('chat-input').disabled = true;
+      document.getElementById('chat-send').disabled = true;
+      document.getElementById('chat-input').placeholder = 'Conversation ended.';
+      return;
+    }
+    // Check if bot is asking for email
+    if (reply.toLowerCase().includes('email') || reply.toLowerCase().includes('contact')) {
+      awaitingEmail = true;
+    }
+    addBotMessage(reply);
+  } catch(e) {
+    addBotMessage("Sorry, something went wrong. Please use the contact form below.");
+  }
+}
+
+// Enter to send (Shift+Enter for new line)
+document.getElementById('chat-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Auto-resize textarea
+document.getElementById('chat-input').addEventListener('input', function() {
+  this.style.height = '40px';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+async function sendLeadToTelegram() {
+  const summary = chatHistory
+    .filter(m => m.role !== 'system')
+    .map(m => `${m.role === 'user' ? '👤' : '🤖'} ${m.content}`)
+    .join('\n');
+  
+  const text = `🤖 NEW LEAD FROM BRIDGE BOT\n\n📧 Email: ${userEmail}\n\n💬 Conversation:\n${summary}`;
+  
+  await fetch(`https://api.telegram.org/bot${TG_BOT}/sendMessage`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({chat_id: TG_CHAT, text: text})
+  });
+}
+
+
+// ── CHAT TOOLTIP ──
+(function() {
+  let tooltipShown = false;
+  setTimeout(function() {
+    if (chatOpen || tooltipShown) return;
+    const tt = document.getElementById('chat-tooltip');
+    if (!tt) return;
+    tt.classList.add('show');
+    tooltipShown = true;
+    // Hide after 5 seconds
+    setTimeout(function() { tt.classList.remove('show'); }, 5000);
+    // Hide on any click
+    document.addEventListener('click', function() {
+      tt.classList.remove('show');
+    }, { once: true });
+  }, 10000);
+})();
+
+</script>
 
   
 
