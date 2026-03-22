@@ -315,7 +315,10 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
   .sv::before{background:#c8f542!important}
 
   nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(8,7,6,.97)}
+
+  #bgc{display:none}
 }
+
 
 
 
@@ -372,9 +375,9 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
   <button class="burger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#services" onclick="toggleMobileMenu()">Services</a>
-  <a href="#about" onclick="toggleMobileMenu()">About</a>
-  <a href="#contact" onclick="toggleMobileMenu()">Contact</a>
+  <a href="#services" onclick="toggleMobileMenu()" id="mob-services">Services</a>
+  <a href="#about" onclick="toggleMobileMenu()" id="mob-about">About</a>
+  <a href="#contact" onclick="toggleMobileMenu()" id="mob-contact">Contact</a>
 </div>
 
 <section id="hero">
@@ -708,6 +711,9 @@ function setLang(lang) {
   document.getElementById('nav-services').innerText = t.nav_services;
   document.getElementById('nav-about').innerText = t.nav_about;
   document.getElementById('nav-contact').innerText = t.nav_contact;
+  document.getElementById('mob-services').innerText = t.nav_services;
+  document.getElementById('mob-about').innerText = t.nav_about;
+  document.getElementById('mob-contact').innerText = t.nav_contact;
   document.getElementById('nav-avail').innerText = t.nav_avail;
   document.getElementById('hero-eyebrow').innerHTML = t.hero_eyebrow;
   document.getElementById('hero-tagline').innerHTML = t.hero_tagline;
