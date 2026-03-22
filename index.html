@@ -346,6 +346,7 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
 .pr-curtain.pr-in .pr-d{clip-path:inset(-5% 0 -5% 0);transform:translateY(0)}
 </style>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
   <body>
     <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
@@ -543,7 +544,15 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
           <div class="field"><label id="f-email">Email</label><input type="email" name="email" required placeholder="hello@company.com" id="f-email-input" autocomplete="email"></div>
         </div>
         <div class="field"><label id="f-msg">Message</label><textarea name="message" required placeholder="Tell me about your project or company..." id="f-msg-input"></textarea></div>
-        <button type="submit" class="sub-btn"><span id="f-send">Send message →</span></button>
+        
+  <!-- Honeypot — скрытое поле для ботов -->
+  <div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+    <input type="text" name="website" tabindex="-1" autocomplete="off">
+  </div>
+  <!-- Turnstile -->
+  <div class="cf-turnstile" data-sitekey="0x4AAAAAACujL8n1mxBRmcaU" data-theme="dark"></div>
+
+  <button type="submit" class="sub-btn"><span id="f-send">Send message →</span></button>
       </form>
       <div class="form-success" id="fsuccess"><p id="fsmsg"></p></div>
     </div>
