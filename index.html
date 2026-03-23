@@ -1095,6 +1095,7 @@ document.querySelectorAll('.sv-split').forEach(el=>svObs.observe(el));
 
 const prObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('pr-in');});},{threshold:.05,rootMargin:'0px 0px -30px 0px'});
 document.querySelectorAll('.pr-curtain').forEach(el=>prObs.observe(el));
+function openPrivacy(){document.getElementById('privacy-overlay').classList.add('open');}
 function closePrivacy(){document.getElementById('privacy-overlay').classList.remove('open');}
 function closePrivacyOutside(e){if(e.target===document.getElementById('privacy-overlay'))closePrivacy();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePrivacy();});
