@@ -1045,6 +1045,15 @@ if (contactForm) {
     btn.innerHTML = '<span>Sending...</span>';
     
     const formData = new FormData(contactForm);
+
+    // Block links in message
+    const msgVal = formData.get('message') || '';
+    if (/(https?:\/\/|t\.me\/|www\.)/i.test(msgVal)) {
+      alert('Links are not allowed in messages.');
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+      return;
+    }
     
     try {
       const response = await fetch(contactForm.action, {
