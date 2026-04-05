@@ -77,9 +77,13 @@ nav a:hover{color:var(--fg)}
 .mobile-menu{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;background:var(--bg);z-index:199;flex-direction:column;justify-content:center;align-items:center;gap:2rem;font-family:'Unbounded',sans-serif}
 .mobile-menu a{font-size:1.2rem;letter-spacing:.12em;text-transform:uppercase;color:var(--fg);text-decoration:none}
 .mobile-menu.open{display:flex}
-#bgc{position:fixed;inset:0;z-index:-1;pointer-events:none;transform:translateZ(0);will-change:auto;isolation:isolate}
+#bgc{position:fixed;inset:0;z-index:-1;pointer-events:none;transform:translateZ(0);will-change:auto;isolation:isolate;display:none}
 .pw{position:relative;z-index:1}
 #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:6rem var(--pad) 2rem;overflow:hidden;position:relative;z-index:1}
+#hero-gl{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#hero-gl canvas{width:100%!important;height:100%!important;display:block}
+.hero-gl-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(105deg,rgba(8,7,6,.88) 0%,rgba(8,7,6,.62) 50%,rgba(8,7,6,.08) 100%);pointer-events:none}
+#hero .hero-value-badge,#hero .hero-eyebrow,#hero .h1,#hero .hero-tagline,#hero .hero-sub,#hero .hero-bar,#hero .hero-scroll-hint{position:relative;z-index:3}
 .hero-eyebrow{font-size:.75rem;letter-spacing:.22em;text-transform:uppercase;color:var(--acc);margin-bottom:1.5rem;opacity:0;animation:rise .6s .1s forwards}
 .parallax-word{display:inline-block;transition:transform 0.1s cubic-bezier(0.2, 0.9, 0.4, 1.1), color 0.2s ease;will-change:transform;cursor:default;backface-visibility:hidden}
 .parallax-word.outline{-webkit-text-stroke:1.5px var(--fg);color:transparent}
@@ -460,6 +464,8 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
 </div>
 
 <section id="hero">
+  <div id="hero-gl"><canvas id="hero-webgl"></canvas></div>
+  <div class="hero-gl-overlay"></div>
   <p class="hero-eyebrow" id="hero-eyebrow">UX · Product Strategy · Digital Sales</p>
   <h1 class="h1" id="headline-main">
     <span class="parallax-word" data-w="0">WHERE</span><br>
@@ -940,94 +946,135 @@ let mx=window.innerWidth/2,my=window.innerHeight/2,rx=mx,ry=my;
 document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
 (function ar(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(ar);})();
 
-const cv=document.getElementById('bgc'),ctx=cv.getContext('2d');
-let W=0,H=0,sY=0;
-function rsz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
-rsz();window.addEventListener('resize',rsz);
-window.addEventListener('scroll',()=>{sY=window.scrollY;});
-class P{
-  constructor(){this.reset(true);}
-  reset(r){
-    this.x=Math.random()*W;
-    this.y=r?Math.random()*H:H+10;
-    this.bvx=(Math.random()-.5)*0.35;
-    this.bvy=-(Math.random()*0.6+0.12);
-    this.vx=this.bvx;
-    this.vy=this.bvy;
-    this.r=Math.random()*2.2+0.6;
-    this.a=Math.random()*0.8+0.3;
-    this.fade=Math.random()*0.002+0.0008;
-    this.lime=Math.random()<0.35;
+const cv=document.getElementById('bgc');
+if(cv){cv.style.display='none';}
+
+// ── WEBGL PHOSPHOR SHADER (hero background) ──
+(function(){
+  const canvas = document.getElementById('hero-webgl');
+  const heroEl = document.getElementById('hero');
+  if(!canvas || !heroEl) return;
+
+  const gl = canvas.getContext('webgl2', {premultipliedAlpha:false, antialias:false});
+  if(!gl){ heroEl.style.background='radial-gradient(ellipse at 70% 50%, rgba(200,245,66,0.12) 0%, #080706 60%)'; return; }
+
+  const VERT = `#version 300 es
+precision highp float;
+layout(location=0) in vec2 a_pos;
+out vec2 v_uv;
+void main(){ v_uv=a_pos*.5+.5; gl_Position=vec4(a_pos,0.,1.); }`;
+
+  const FRAG = `#version 300 es
+precision highp float;
+out vec4 fragColor;
+in vec2 v_uv;
+uniform vec3 iResolution;
+uniform float iTime;
+uniform vec4 iMouse;
+
+void mainImage(out vec4 o, in vec2 fc){
+  vec2 r = iResolution.xy;
+  float t = iTime * 0.55;
+  vec3 FC3 = vec3(fc, t);
+  o = vec4(0.);
+  float s = 0.;
+
+  for(float i=0.,z=0.,d=0.; i++<8e1;
+      o += (cos(s + vec4(2.1, 3.8, 5.5, 0.)) + 1.) / d)
+  {
+    vec3 p = z * normalize(FC3 * 2. - r.xyy);
+    vec3 a = normalize(cos(vec3(5.,0.,1.) + t - d*4.));
+    p.z += 5.;
+    a = a*dot(a,p) - cross(a,p);
+    for(d=1.; d++<9.;)
+      a -= sin(a*d + t).zxy / d;
+    z += d = .1*abs(length(p)-3.) + .07*abs(cos(s=a.y));
   }
-  update(){
-    const dx=this.x-mx,dy=this.y-(my+sY),d=Math.sqrt(dx*dx+dy*dy);
-    if(d<220&&d>0){
-      const f=Math.pow(1-d/220,1.5)*1.2;
-      this.vx+=(dx/d)*f*0.7;
-      this.vy+=(dy/d)*f*0.7;
-    }
-    this.vy-=Math.min(sY*0.00012,0.25);
-    this.vx+=(this.bvx-this.vx)*0.03;
-    this.vy+=(this.bvy-this.vy)*0.03;
-    this.vx*=0.96;
-    this.vy*=0.96;
-    this.x+=this.vx;
-    this.y+=this.vy;
-    this.a-=this.fade;
-    if(this.a<=0.02||this.y<-50||this.x<-50||this.x>W+50){
-      this.reset(false);
-      this.y=H+20;
-      this.a=Math.random()*0.8+0.3;
-    }
-  }
-  draw(){
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
-    ctx.fillStyle=this.lime?`rgba(200,245,66,${this.a*0.9})`:`rgba(237,233,224,${this.a*0.6})`;
-    ctx.fill();
-    if(this.lime && this.r>1){
-      ctx.beginPath();
-      ctx.arc(this.x,this.y,this.r*0.5,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,245,66,${this.a*0.5})`;
-      ctx.fill();
-    }
-  }
+
+  o = tanh(o / 5e3);
+
+  // mouse parallax glow
+  vec2 uv = fc / r;
+  vec2 mp = iMouse.xy / r;
+  float dist = length(uv - mp);
+  float glow = smoothstep(.55, 0., dist) * .18;
+  o.rgb += vec3(.78, .96, .26) * glow;
+
+  // vignette
+  vec2 vUV = fc/r;
+  float vig = 1. - smoothstep(.3, 1.4, length(vUV - .5) * 1.5);
+  o.rgb *= vig;
+
+  fragColor = vec4(o.rgb, 1.);
 }
-const _mob=window.innerWidth<=768;
-const pts=Array.from({length:_mob?60:420},()=>new P());
-function drawLines(){
-  for(let i=0;i<pts.length;i++){
-    for(let j=i+1;j<pts.length;j++){
-      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<120){
-        ctx.beginPath();
-        ctx.moveTo(pts[i].x,pts[i].y);
-        ctx.lineTo(pts[j].x,pts[j].y);
-        const opacity=(1-d/120)*0.12;
-        ctx.strokeStyle=`rgba(200,245,66,${opacity})`;
-        ctx.lineWidth=0.6;
-        ctx.stroke();
-      }
-    }
+
+void main(){ mainImage(fragColor, gl_FragCoord.xy); }`;
+
+  function compile(type, src){
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)){ console.error(gl.getShaderInfoLog(sh)); return null; }
+    return sh;
   }
-}
-function drawAura(){
-  const g=ctx.createRadialGradient(mx,my+sY,0,mx,my+sY,220);
-  g.addColorStop(0,'rgba(200,245,66,0.12)');
-  g.addColorStop(0.5,'rgba(200,245,66,0.03)');
-  g.addColorStop(1,'rgba(200,245,66,0)');
-  ctx.beginPath();
-  ctx.arc(mx,my+sY,220,0,Math.PI*2);
-  ctx.fillStyle=g;
-  ctx.fill();
-}
-(function loop(){
-  ctx.clearRect(0,0,W,H);
-  drawAura();
-  drawLines();
-  pts.forEach(p=>{p.update();p.draw();});
-  requestAnimationFrame(loop);
+  const vs = compile(gl.VERTEX_SHADER, VERT);
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if(!vs||!fs) return;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog,vs); gl.attachShader(prog,fs); gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ console.error(gl.getProgramInfoLog(prog)); return; }
+
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  const vbo = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,3,-1,-1,3]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+
+  const uRes   = gl.getUniformLocation(prog,'iResolution');
+  const uTime  = gl.getUniformLocation(prog,'iTime');
+  const uMouse = gl.getUniformLocation(prog,'iMouse');
+
+  let W=0, H=0, startT=performance.now();
+  let mouseX=0.5, mouseY=0.5;
+
+  function resize(){
+    const dpr = Math.min(window.devicePixelRatio||1, 1.5);
+    W = Math.floor(heroEl.offsetWidth * dpr);
+    H = Math.floor(heroEl.offsetHeight * dpr);
+    canvas.width = W; canvas.height = H;
+    gl.viewport(0,0,W,H);
+  }
+  resize();
+  new ResizeObserver(resize).observe(heroEl);
+
+  heroEl.addEventListener('mousemove', e=>{
+    const r = heroEl.getBoundingClientRect();
+    mouseX = (e.clientX - r.left);
+    mouseY = (r.height - (e.clientY - r.top));
+  }, {passive:true});
+
+  let raf;
+  function tick(ts){
+    raf = requestAnimationFrame(tick);
+    const t = (ts - startT) * 0.001;
+    gl.useProgram(prog);
+    gl.uniform3f(uRes, W, H, 1);
+    gl.uniform1f(uTime, t);
+    gl.uniform4f(uMouse, mouseX, mouseY, 0, 0);
+    gl.bindVertexArray(vao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  raf = requestAnimationFrame(tick);
+
+  // pause when off-screen for perf
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ if(!raf) raf=requestAnimationFrame(tick); }
+      else { cancelAnimationFrame(raf); raf=null; }
+    });
+  }, {threshold:0});
+  obs.observe(heroEl);
 })();
+
 
 function cg(e,el){const r=el.getBoundingClientRect();el.style.setProperty('--cx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');el.style.setProperty('--cy',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');}
 
