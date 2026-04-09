@@ -31,6 +31,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <script type="application/ld+json">
@@ -503,7 +504,7 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
 </div>
 
 <section id="hero">
-  <canvas id="hero-tubes" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
+  <canvas id="hero-tubes" aria-hidden="true" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"></canvas>
   <div class="hero-gl-overlay"></div>
   <p class="hero-eyebrow" id="hero-eyebrow">UX · Product Strategy · Digital Sales</p>
   <h1 class="h1" id="headline-main">
@@ -706,7 +707,7 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
           <input type="text" name="website" tabindex="-1" autocomplete="off">
         </div>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAACujL8n1mxBRmcaU" data-theme="dark" data-callback="onTurnstileOk" data-expired-callback="onTurnstileExpire"></div>
-        <button type="submit" class="sub-btn" id="submitBtn"><span id="f-send">Send message →</span></button>
+        <button type="submit" class="sub-btn" id="submitBtn" disabled><span id="f-send">Send message →</span></button>
       </form>
       <div class="form-response" id="formResponse">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -771,7 +772,7 @@ footer p{font-size:.78rem;letter-spacing:.06em;color:var(--dim)}
 <script>
 // Mobile Optimizations: Disable heavy animations
 (function() {
-  var isMobileCheck = window.innerWidth <= 768;
+  var isMobileCheck = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
   if (isMobileCheck) {
     var heroGl = document.getElementById('hero-gl');
     var heroTubes = document.getElementById('hero-tubes');
@@ -914,7 +915,18 @@ const translations = {
 function setLang(lang) {
   const t = translations[lang];
   if (!t) return;
-  const s = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+  // Safe innerHTML setter — preserves computed opacity/animation state
+  const s = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const currentOpacity = window.getComputedStyle(el).opacity;
+    el.innerHTML = val;
+    // If element was already visible (animation done), keep it visible
+    if (parseFloat(currentOpacity) > 0) {
+      el.style.opacity = '1';
+      el.style.animation = 'none';
+    }
+  };
   const st = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
   st('nav-services', t.nav_services); st('nav-about', t.nav_about); st('nav-contact', t.nav_contact);
@@ -994,7 +1006,7 @@ mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => 
 
 // Detect reduced motion & mobile
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = window.innerWidth <= 768;
+const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
 
 // Parallax — hero only, disabled on mobile & reduced motion
 if (!prefersReducedMotion && !isMobile) {
@@ -1080,11 +1092,14 @@ if (!prefersReducedMotion && !isMobile) {
   (function ar() { rx += (mx-rx)*.12; ry += (my-ry)*.12; ring.style.left = rx+'px'; ring.style.top = ry+'px'; requestAnimationFrame(ar); })();
 }
 
-// Hero Tubes Cursor Animation — lazy loaded after page content
+// Hero Tubes Cursor Animation — starts on window load (no artificial delay)
 if (!prefersReducedMotion && !isMobile) {
   (async () => {
-    const idleCallback = window.requestIdleCallback || (cb => setTimeout(cb, 1500));
-    await new Promise(resolve => idleCallback(resolve));
+    // window.load = DOM + fonts + CSS animations already running, no extra timeout needed
+    await new Promise(resolve => {
+      if (document.readyState === 'complete') resolve();
+      else window.addEventListener('load', resolve, { once: true });
+    });
     if (window.innerWidth <= 768) return;
     try {
       const mod = await import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js');
@@ -1112,7 +1127,7 @@ if (!prefersReducedMotion && !isMobile) {
   })();
 }
 
-// Form// Form// Form
+// Form
 const contactForm = document.getElementById('cform');
 const successDiv = document.getElementById('fsuccess');
 const successMsg = document.getElementById('fsmsg');
