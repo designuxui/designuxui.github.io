@@ -31,7 +31,6 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" sizes="192x192" href="favicon-192.png">
 
-<link rel="modulepreload" href="./tubes1.min.js">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
@@ -1093,18 +1092,17 @@ if (!prefersReducedMotion && !isMobile) {
   (function ar() { rx += (mx-rx)*.12; ry += (my-ry)*.12; ring.style.left = rx+'px'; ring.style.top = ry+'px'; requestAnimationFrame(ar); })();
 }
 
-// Hero Tubes Cursor Animation
-// Strategy: start downloading the 775KB bundle immediately (parallel to page load),
-// but delay WebGL init (the actual freeze cause) until AFTER CSS hero animations finish (1.4s).
+// Hero Tubes Cursor Animation — starts on window load (no artificial delay)
 if (!prefersReducedMotion && !isMobile) {
-  // File is served locally (same GitHub Pages domain) — no CDN latency
-  const tubesModPromise = import('./tubes1.min.js').catch(() => null);
-
-  setTimeout(async () => {
+  (async () => {
+    // window.load = DOM + fonts + CSS animations already running, no extra timeout needed
+    await new Promise(resolve => {
+      if (document.readyState === 'complete') resolve();
+      else window.addEventListener('load', resolve, { once: true });
+    });
     if (window.innerWidth <= 768) return;
     try {
-      const mod = await tubesModPromise;
-      if (!mod) return;
+      const mod = await import('https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js');
       const TubesCursor = mod.default || mod;
       const canvas = document.getElementById('hero-tubes');
       if (canvas) {
@@ -1122,47 +1120,11 @@ if (!prefersReducedMotion && !isMobile) {
             }
           }
         });
-
-        // Warmup: aggressively simulate cursor across entire hero area
-        // to force shader compilation before user ever hovers
-        (function warmupShaders() {
-          const rect = canvas.getBoundingClientRect();
-
-          function fire(x, y) {
-            const ev = new PointerEvent('pointermove', {
-              clientX: x, clientY: y, bubbles: true, cancelable: true
-            });
-            document.body.dispatchEvent(ev);
-          }
-
-          // Step 1: immediately fire a grid of points across the whole canvas
-          // This covers all shader code paths (different positions = different uniforms)
-          let step = 0;
-          const W = rect.width, H = rect.height;
-          const pts = [];
-          for (let gx = 0; gx <= 4; gx++)
-            for (let gy = 0; gy <= 3; gy++)
-              pts.push([rect.left + (gx/4)*W, rect.top + (gy/3)*H]);
-
-          // Also sweep a fast spiral to trigger motion-dependent paths
-          for (let i = 0; i < 60; i++) {
-            const a = (i / 60) * Math.PI * 6;
-            const r = (i / 60) * Math.min(W, H) * 0.4;
-            pts.push([rect.left + W*0.65 + Math.cos(a)*r,
-                      rect.top  + H*0.45 + Math.sin(a)*r]);
-          }
-
-          const iv = setInterval(() => {
-            if (step >= pts.length) { clearInterval(iv); return; }
-            fire(pts[step][0], pts[step][1]);
-            step++;
-          }, 16); // 60fps — as fast as possible
-        })();
       }
     } catch (e) {
       console.warn('Tubes animation failed to load', e);
     }
-  }, 1800);
+  })();
 }
 
 // Form
