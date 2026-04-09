@@ -1122,6 +1122,37 @@ if (!prefersReducedMotion && !isMobile) {
             }
           }
         });
+
+        // Force shader compilation immediately by simulating cursor movement
+        // across the canvas — this triggers WebGL shader compile BEFORE
+        // the user hovers, so the freeze happens invisibly in the background.
+        (function warmupShaders() {
+          const rect = canvas.getBoundingClientRect();
+          const cx = rect.left + rect.width * 0.65;
+          const cy = rect.top  + rect.height * 0.45;
+          const steps = 12;
+          let step = 0;
+          const angle = (Math.PI * 2) / steps;
+          const r = 40;
+          function fireEvent(x, y) {
+            canvas.dispatchEvent(new PointerEvent('pointermove', {
+              clientX: x, clientY: y,
+              bubbles: true, cancelable: true
+            }));
+            document.body.dispatchEvent(new PointerEvent('pointermove', {
+              clientX: x, clientY: y,
+              bubbles: true, cancelable: true
+            }));
+          }
+          const iv = setInterval(() => {
+            if (step >= steps) { clearInterval(iv); return; }
+            fireEvent(
+              cx + Math.cos(step * angle) * r,
+              cy + Math.sin(step * angle) * r
+            );
+            step++;
+          }, 32);
+        })();
       }
     } catch (e) {
       console.warn('Tubes animation failed to load', e);
