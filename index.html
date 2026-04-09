@@ -1123,35 +1123,40 @@ if (!prefersReducedMotion && !isMobile) {
           }
         });
 
-        // Force shader compilation immediately by simulating cursor movement
-        // across the canvas — this triggers WebGL shader compile BEFORE
-        // the user hovers, so the freeze happens invisibly in the background.
+        // Warmup: aggressively simulate cursor across entire hero area
+        // to force shader compilation before user ever hovers
         (function warmupShaders() {
           const rect = canvas.getBoundingClientRect();
-          const cx = rect.left + rect.width * 0.65;
-          const cy = rect.top  + rect.height * 0.45;
-          const steps = 12;
-          let step = 0;
-          const angle = (Math.PI * 2) / steps;
-          const r = 40;
-          function fireEvent(x, y) {
-            canvas.dispatchEvent(new PointerEvent('pointermove', {
-              clientX: x, clientY: y,
-              bubbles: true, cancelable: true
-            }));
-            document.body.dispatchEvent(new PointerEvent('pointermove', {
-              clientX: x, clientY: y,
-              bubbles: true, cancelable: true
-            }));
+
+          function fire(x, y) {
+            const ev = new PointerEvent('pointermove', {
+              clientX: x, clientY: y, bubbles: true, cancelable: true
+            });
+            document.body.dispatchEvent(ev);
           }
+
+          // Step 1: immediately fire a grid of points across the whole canvas
+          // This covers all shader code paths (different positions = different uniforms)
+          let step = 0;
+          const W = rect.width, H = rect.height;
+          const pts = [];
+          for (let gx = 0; gx <= 4; gx++)
+            for (let gy = 0; gy <= 3; gy++)
+              pts.push([rect.left + (gx/4)*W, rect.top + (gy/3)*H]);
+
+          // Also sweep a fast spiral to trigger motion-dependent paths
+          for (let i = 0; i < 60; i++) {
+            const a = (i / 60) * Math.PI * 6;
+            const r = (i / 60) * Math.min(W, H) * 0.4;
+            pts.push([rect.left + W*0.65 + Math.cos(a)*r,
+                      rect.top  + H*0.45 + Math.sin(a)*r]);
+          }
+
           const iv = setInterval(() => {
-            if (step >= steps) { clearInterval(iv); return; }
-            fireEvent(
-              cx + Math.cos(step * angle) * r,
-              cy + Math.sin(step * angle) * r
-            );
+            if (step >= pts.length) { clearInterval(iv); return; }
+            fire(pts[step][0], pts[step][1]);
             step++;
-          }, 32);
+          }, 16); // 60fps — as fast as possible
         })();
       }
     } catch (e) {
