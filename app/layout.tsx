@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Unbounded } from "next/font/google";
 import "./globals.css";
+import Nav from "@/app/components/ui/Nav";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -26,7 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${dmSans.variable} ${unbounded.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Nav />
+        {children}
+      </body>
     </html>
   );
 }

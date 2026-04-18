@@ -43,7 +43,7 @@ export default function Hero() {
   };
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center px-16 pt-28 pb-16 overflow-hidden" style={{ background: "var(--bg)" }}>
+    <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center px-16 pb-16 overflow-hidden" style={{ background: "var(--bg)", paddingTop: "120px" }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(200,245,66,0.06) 0%, transparent 70%)" }} />
       <div ref={eyebrowRef} className="mb-6 opacity-0" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--acc)" }}>
         UX · Product · Growth
