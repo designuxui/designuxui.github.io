@@ -1,4 +1,5 @@
 import Hero from "@/app/components/sections/Hero";
+import Results from "@/app/components/sections/Results";
 import Ticker from "@/app/components/sections/Ticker";
 
 export default function Home() {
@@ -6,6 +7,7 @@ export default function Home() {
     <main>
       <Hero />
       <Ticker />
+      <Results />
     </main>
   );
 }
