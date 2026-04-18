@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #080706;
+  --fg: #ede9e0;
+  --acc: #c8f542;
+  --dim: rgba(237, 233, 224, 0.7);
+  --line: rgba(237, 233, 224, 0.09);
+  --card: rgba(237, 233, 224, 0.03);
+  --glass: rgba(237, 233, 224, 0.04);
+  --glass-border: rgba(237, 233, 224, 0.08);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-acc: var(--acc);
+  --color-dim: var(--dim);
+  --color-line: var(--line);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis возьмёт управление */
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--acc);
+  color: var(--bg);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
