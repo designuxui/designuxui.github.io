@@ -64,8 +64,13 @@ export default function Results() {
     <section
       ref={sectionRef}
       id="results"
-      className="relative px-6 py-20 sm:px-12 lg:px-16 lg:py-28"
-      style={{ background: "#080706", borderTop: "1px solid rgba(237, 233, 224, 0.09)" }}
+      className="relative py-20 lg:py-28"
+      style={{
+        background: "#080706",
+        borderTop: "1px solid rgba(237, 233, 224, 0.09)",
+        paddingLeft: "4rem",
+        paddingRight: "4rem",
+      }}
     >
       <div className="mx-auto max-w-6xl">
         <p

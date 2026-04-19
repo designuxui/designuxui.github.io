@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { DM_Sans, Unbounded } from "next/font/google";
 import "./globals.css";
+import Cursor from "@/app/components/ui/Cursor";
 import Nav from "@/app/components/ui/Nav";
+import SmoothScroll from "@/app/components/ui/SmoothScroll";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -26,10 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${unbounded.variable}`}>
-      <body>
+    <html lang="en">
+      <body className={`${dmSans.variable} ${unbounded.variable}`}>
+        <Cursor />
         <Nav />
-        {children}
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );

@@ -30,12 +30,19 @@ html {
 }
 
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-dm-sans), "DM Sans", sans-serif;
   font-size: 18px;
   line-height: 1.65;
   overflow-x: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html.custom-cursor body {
+    cursor: none;
+  }
 }
 
 ::selection {

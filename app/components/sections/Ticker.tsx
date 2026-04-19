@@ -1,6 +1,15 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
 export default function Ticker() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+
   const items = [
     "UX Strategy",
     "Product Strategy",
@@ -12,22 +21,55 @@ export default function Ticker() {
     "SaaS Growth",
   ];
 
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    const row = rowRef.current;
+    if (!wrap || !row) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        wrap,
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: wrap,
+            start: "top 95%",
+            toggleActions: "play none none reverse",
+          },
+        },
+      );
+
+      gsap.to(row, {
+        xPercent: -50,
+        ease: "none",
+        duration: 26,
+        repeat: -1,
+      });
+    }, wrap);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div
+      ref={wrapRef}
+      className="px-16 opacity-0"
       style={{
         borderTop: "1px solid var(--line)",
         borderBottom: "1px solid var(--line)",
-        padding: "0.8rem 0",
+        paddingTop: "0.8rem",
+        paddingBottom: "0.8rem",
         overflow: "hidden",
         background: "var(--bg)",
       }}
     >
       <div
-        style={{
-          display: "flex",
-          whiteSpace: "nowrap",
-          animation: "tick 24s linear infinite",
-        }}
+        ref={rowRef}
+        className="flex w-max whitespace-nowrap will-change-transform"
       >
         {[...items, ...items].map((item, i) => (
           <div
@@ -55,13 +97,6 @@ export default function Ticker() {
           </div>
         ))}
       </div>
-
-      <style jsx>{`
-        @keyframes tick {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-      `}</style>
     </div>
   );
 }

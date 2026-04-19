@@ -26,7 +26,7 @@ export default function Nav() {
     <>
       <nav
         ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-16 py-5"
+        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-12 py-5"
         style={{
           backdropFilter: scrolled ? "blur(20px)" : "none",
           background: scrolled ? "rgba(8,7,6,0.88)" : "transparent",

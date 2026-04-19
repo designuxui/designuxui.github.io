@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
@@ -26,6 +26,30 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
+  useLayoutEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const ctx = gsap.context(() => {
+      const glow = hero.querySelector(".hero-glow");
+      if (glow) {
+        gsap.to(glow, {
+          y: 120,
+          scale: 1.08,
+          ease: "none",
+          scrollTrigger: {
+            trigger: hero,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      }
+    }, hero);
+
+    return () => ctx.revert();
+  }, []);
+
   const btnMain: React.CSSProperties = {
     fontFamily: "var(--font-unbounded)", fontWeight: 700, fontSize: "0.75rem",
     letterSpacing: "0.1em", textTransform: "uppercase", padding: "1rem 2rem",
@@ -43,12 +67,15 @@ export default function Hero() {
   };
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center px-16 pb-16 overflow-hidden" style={{ background: "var(--bg)", paddingTop: "120px" }}>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(200,245,66,0.06) 0%, transparent 70%)" }} />
+    <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center pb-16 overflow-hidden" style={{ background: "var(--bg)", paddingTop: "120px", paddingLeft: "4rem", paddingRight: "4rem" }}>
+      <div
+        className="hero-glow absolute inset-0 pointer-events-none will-change-transform"
+        style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(200,245,66,0.06) 0%, transparent 70%)" }}
+      />
       <div ref={eyebrowRef} className="mb-6 opacity-0" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--acc)" }}>
         UX · Product · Growth
       </div>
-      <h1 ref={headlineRef} style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(4rem, 11vw, 12rem)", lineHeight: 0.88, letterSpacing: "-0.03em", color: "var(--fg)" }}>
+      <h1 ref={headlineRef} style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(3rem, 9vw, 10rem)", lineHeight: 0.88, letterSpacing: "-0.03em", color: "var(--fg)" }}>
         WHERE<br />
         <span style={{ color: "transparent", WebkitTextStroke: "1.5px var(--fg)" }}>DESIGN</span><br />
         MEETS<br />
