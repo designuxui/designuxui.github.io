@@ -26,22 +26,20 @@ export default function Ticker() {
     const row = rowRef.current;
     if (!wrap || !row) return;
 
+    gsap.set(wrap, { opacity: 0, y: 24 });
+
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        wrap,
-        { opacity: 0, y: 24 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: wrap,
-            start: "top 95%",
-            toggleActions: "play none none reverse",
-          },
+      gsap.to(wrap, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: wrap,
+          start: "top 95%",
+          toggleActions: "play none none reverse",
         },
-      );
+      });
 
       gsap.to(row, {
         xPercent: -50,
@@ -57,7 +55,7 @@ export default function Ticker() {
   return (
     <div
       ref={wrapRef}
-      className="px-16 opacity-0"
+      className="px-16"
       style={{
         borderTop: "1px solid var(--line)",
         borderBottom: "1px solid var(--line)",

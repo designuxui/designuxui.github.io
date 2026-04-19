@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 
 export default function Nav() {
@@ -8,18 +9,24 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    gsap.fromTo(navRef.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.3, ease: "power3.out" });
+  useLayoutEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    gsap.set(el, { opacity: 0, y: -20 });
+    gsap.to(el, { opacity: 1, y: 0, duration: 0.8, delay: 0.3, ease: "power3.out" });
+  }, []);
+
+  useLayoutEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const links = [
-    { href: "#services", label: "Services" },
-    { href: "#cases", label: "Work" },
-    { href: "#about", label: "About" },
-    { href: "#contact", label: "Contact" },
+    { href: "/#services", label: "Services" },
+    { href: "/#cases", label: "Work" },
+    { href: "/#about", label: "About" },
+    { href: "/#contact", label: "Contact" },
   ];
 
   return (
@@ -32,24 +39,35 @@ export default function Nav() {
           background: scrolled ? "rgba(8,7,6,0.88)" : "transparent",
           borderBottom: scrolled ? "1px solid var(--line)" : "1px solid transparent",
           transition: "background 0.4s, border-color 0.4s",
-          opacity: 0,
         }}
       >
-        <a href="#" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--fg)", textDecoration: "none" }}>
+        <Link href="/" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--fg)", textDecoration: "none" }}>
           BRIDGE<span style={{ color: "var(--acc)" }}>.</span>
-        </a>
+        </Link>
 
         <ul className="hidden md:flex gap-9 list-none">
           {links.map((link) => (
             <li key={link.href}>
-              <a href={link.href} style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--dim)", textDecoration: "none", transition: "color 0.2s" }}
+              <Link
+                href={link.href}
+                style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--dim)", textDecoration: "none", transition: "color 0.2s" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "var(--dim)")}
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
+          <li>
+            <Link
+              href="/marketplace"
+              style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "var(--dim)", textDecoration: "none", transition: "color 0.2s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--dim)")}
+            >
+              Marketplace
+            </Link>
+          </li>
         </ul>
 
         <div className="hidden md:flex items-center gap-5">
@@ -57,9 +75,9 @@ export default function Nav() {
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--acc)", display: "inline-block", animation: "pulse 2.2s ease infinite" }} />
             Available
           </div>
-          <a href="#contact" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, padding: "0.6rem 1.4rem", background: "var(--acc)", color: "var(--bg)", borderRadius: "100px", textDecoration: "none" }}>
+          <Link href="/#contact" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, padding: "0.6rem 1.4rem", background: "var(--acc)", color: "var(--bg)", borderRadius: "100px", textDecoration: "none" }}>
             Hire me
-          </a>
+          </Link>
         </div>
 
         <button className="md:hidden flex flex-col justify-between w-7 h-5 bg-transparent border-none cursor-pointer" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
@@ -74,11 +92,15 @@ export default function Nav() {
       {menuOpen && (
         <div className="fixed inset-0 z-40 flex flex-col justify-center items-center gap-8" style={{ background: "var(--bg)" }}>
           {links.map((link) => (
-            <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
+            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
               style={{ fontFamily: "var(--font-unbounded)", fontSize: "1.4rem", letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "var(--fg)", textDecoration: "none" }}>
               {link.label}
-            </a>
+            </Link>
           ))}
+          <Link href="/marketplace" onClick={() => setMenuOpen(false)}
+            style={{ fontFamily: "var(--font-unbounded)", fontSize: "1.4rem", letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "var(--fg)", textDecoration: "none" }}>
+            Marketplace
+          </Link>
         </div>
       )}
 
