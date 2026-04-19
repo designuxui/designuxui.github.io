@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,44 +16,60 @@ const STATS = [
 
 export default function About() {
   const rootRef = useRef<HTMLElement>(null);
+  const bioRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    const bio = bioRef.current;
+    if (!root || !bio) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".about-col-left > *",
-        { y: 48, opacity: 0 },
-        {
-          y: 0,
+      const split = new SplitType(bio, { types: "lines" });
+      gsap.set(split.lines, { opacity: 0, y: 28 });
+
+      gsap.to(split.lines, {
+        opacity: 1,
+        y: 0,
+        duration: 0.65,
+        stagger: 0.12,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: bio,
+          start: "top 78%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      const statCells = root.querySelectorAll(".about-stat");
+      gsap.set(statCells, { opacity: 0, y: 24 });
+      gsap.to(statCells, {
+        opacity: 1,
+        y: 0,
+        duration: 0.55,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: root.querySelector(".about-stats-grid"),
+          start: "top 82%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      const h2 = root.querySelector(".about-heading");
+      if (h2) {
+        gsap.set(h2, { opacity: 0, y: 36 });
+        gsap.to(h2, {
           opacity: 1,
-          duration: 0.85,
-          stagger: 0.12,
+          y: 0,
+          duration: 0.75,
           ease: "power3.out",
           scrollTrigger: {
             trigger: root,
-            start: "top 78%",
+            start: "top 85%",
             toggleActions: "play none none reverse",
           },
-        },
-      );
-      gsap.fromTo(
-        ".about-col-right",
-        { y: 56, opacity: 0, scale: 0.98 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: root,
-            start: "top 72%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
+        });
+      }
     }, root);
 
     return () => ctx.revert();
@@ -66,8 +83,8 @@ export default function About() {
       id="about"
       style={{
         padding: "7rem 4rem",
-        background: "#080706",
-        color: "#ede9e0",
+        background: "var(--bg)",
+        color: "var(--fg)",
         fontFamily: "var(--font-dm-sans)",
       }}
     >
@@ -79,51 +96,52 @@ export default function About() {
           fontWeight: 700,
           letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "#c8f542",
+          color: "var(--acc)",
         }}
       >
         About
       </p>
-      <div className="grid max-w-[72rem] grid-cols-1 gap-12 lg:grid-cols-2 lg:items-start lg:gap-20" style={{ margin: "0 auto" }}>
-        <div className="about-col-left">
+      <div className="mx-auto grid max-w-[72rem] grid-cols-1 gap-12 lg:grid-cols-2 lg:items-start lg:gap-20">
+        <div>
           <h2
-            className="opacity-0"
+            className="about-heading mb-6"
             style={{
               ...heading,
               fontWeight: 900,
               fontSize: "clamp(2rem, 4vw, 2.75rem)",
               letterSpacing: "-0.03em",
               lineHeight: 1.1,
-              marginBottom: "1.5rem",
             }}
           >
             One bridge between design and growth
           </h2>
-          <p className="opacity-0" style={{ fontSize: "1.05rem", lineHeight: 1.7, color: "rgba(237, 233, 224, 0.7)", marginBottom: "1rem" }}>
-            Placeholder bio: I work with founders and product teams to tighten UX, sharpen strategy, and build revenue
-            systems—so you ship fewer handoffs and more momentum.
-          </p>
-          <p className="opacity-0" style={{ fontSize: "1.05rem", lineHeight: 1.7, color: "rgba(237, 233, 224, 0.7)" }}>
-            This copy will be replaced with your real story, stack, and how you like to collaborate.
-          </p>
+          <div ref={bioRef} className="about-bio-text max-w-xl text-[1.05rem] leading-[1.75]" style={{ color: "var(--dim)" }}>
+            <p className="mb-5">
+              I work with founders and product teams to tighten UX, sharpen strategy, and build revenue systems—so you
+              ship fewer handoffs and more momentum.
+            </p>
+            <p>
+              This copy will be replaced with your real story, stack, and how you like to collaborate.
+            </p>
+          </div>
         </div>
         <div
-          className="about-col-right grid grid-cols-2 gap-4 border p-6 opacity-0"
+          className="about-stats-grid grid grid-cols-2 gap-4 border p-6"
           style={{
-            borderColor: "rgba(237, 233, 224, 0.09)",
+            borderColor: "var(--line)",
             borderRadius: "4px",
-            background: "rgba(237, 233, 224, 0.03)",
+            background: "var(--card)",
           }}
         >
           {STATS.map((s) => (
-            <div key={s.label} style={{ padding: "1rem 0.5rem" }}>
+            <div key={s.label} className="about-stat" style={{ padding: "1rem 0.5rem" }}>
               <span
                 style={{
                   display: "block",
                   ...heading,
                   fontWeight: 900,
                   fontSize: "1.75rem",
-                  color: "#c8f542",
+                  color: "var(--acc)",
                   letterSpacing: "-0.02em",
                   marginBottom: "0.35rem",
                 }}
@@ -135,7 +153,7 @@ export default function About() {
                   fontSize: "0.7rem",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  color: "rgba(237, 233, 224, 0.7)",
+                  color: "var(--dim)",
                 }}
               >
                 {s.label}

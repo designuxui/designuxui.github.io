@@ -40,7 +40,8 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html.custom-cursor body {
+  html.custom-cursor body,
+  html.magnetic-cursor body {
     cursor: none;
   }
 }

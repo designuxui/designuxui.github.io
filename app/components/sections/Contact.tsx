@@ -46,34 +46,74 @@ const fieldStyle: React.CSSProperties = {
   outline: "none",
 };
 
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n));
+}
+
 export default function Contact() {
   const [sent, setSent] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+  const magneticWrapRef = useRef<HTMLDivElement>(null);
+  const submitRef = useRef<HTMLButtonElement>(null);
 
   useLayoutEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        el.querySelectorAll(".contact-reveal"),
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.85,
-          stagger: 0.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
+      const nodes = el.querySelectorAll(".contact-reveal");
+      gsap.set(nodes, { y: 40, opacity: 0 });
+      gsap.to(nodes, {
+        y: 0,
+        opacity: 1,
+        duration: 0.85,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
         },
-      );
+      });
     }, el);
 
     return () => ctx.revert();
+  }, []);
+
+  useLayoutEffect(() => {
+    const wrap = magneticWrapRef.current;
+    const btn = submitRef.current;
+    if (!wrap || !btn) return;
+
+    const reset = () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.35, ease: "power3.out" });
+    };
+
+    const onMove = (e: MouseEvent) => {
+      const r = wrap.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+        reset();
+        return;
+      }
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = (e.clientX - cx) * 0.22;
+      const dy = (e.clientY - cy) * 0.22;
+      gsap.to(btn, {
+        x: clamp(dx, -14, 14),
+        y: clamp(dy, -12, 12),
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
+
+    wrap.addEventListener("mousemove", onMove);
+    wrap.addEventListener("mouseleave", reset);
+    return () => {
+      wrap.removeEventListener("mousemove", onMove);
+      wrap.removeEventListener("mouseleave", reset);
+    };
   }, []);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -83,12 +123,12 @@ export default function Contact() {
 
   return (
     <section ref={sectionRef} id="contact" style={section}>
-      <p className="contact-reveal opacity-0" style={eyebrow}>
+      <p className="contact-reveal" style={eyebrow}>
         Contact
       </p>
       <div style={{ maxWidth: "36rem" }}>
         <h2
-          className="contact-reveal opacity-0"
+          className="contact-reveal"
           style={{
             fontFamily: "var(--font-unbounded)",
             fontWeight: 900,
@@ -100,13 +140,10 @@ export default function Contact() {
         >
           Start a project
         </h2>
-        <p
-          className="contact-reveal opacity-0"
-          style={{ fontSize: "1.05rem", lineHeight: 1.65, color: "var(--dim)", marginBottom: "2.5rem" }}
-        >
+        <p className="contact-reveal" style={{ fontSize: "1.05rem", lineHeight: 1.65, color: "var(--dim)", marginBottom: "2.5rem" }}>
           Placeholder form—wire this to your API or form provider when ready.
         </p>
-        <form className="contact-reveal opacity-0" onSubmit={handleSubmit}>
+        <form className="contact-reveal" onSubmit={handleSubmit}>
           <div style={{ marginBottom: "1.25rem" }}>
             <label htmlFor="contact-name" style={labelStyle}>
               Name
@@ -123,33 +160,31 @@ export default function Contact() {
             <label htmlFor="contact-message" style={labelStyle}>
               Message
             </label>
-            <textarea
-              id="contact-message"
-              name="message"
-              required
-              rows={5}
-              style={{ ...fieldStyle, resize: "vertical", minHeight: "8rem" }}
-            />
+            <textarea id="contact-message" name="message" required rows={5} style={{ ...fieldStyle, resize: "vertical", minHeight: "8rem" }} />
           </div>
-          <button
-            type="submit"
-            data-cursor-hover
-            style={{
-              fontFamily: "var(--font-unbounded)",
-              fontWeight: 700,
-              fontSize: "0.75rem",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              padding: "1rem 2rem",
-              background: "var(--acc)",
-              color: "var(--bg)",
-              border: "none",
-              borderRadius: "100px",
-              cursor: "pointer",
-            }}
-          >
-            Send message
-          </button>
+          <div ref={magneticWrapRef} className="inline-block py-2" style={{ paddingLeft: "0.25rem", paddingRight: "0.25rem" }}>
+            <button
+              ref={submitRef}
+              type="submit"
+              data-cursor
+              style={{
+                fontFamily: "var(--font-unbounded)",
+                fontWeight: 700,
+                fontSize: "0.75rem",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                padding: "1rem 2rem",
+                background: "var(--acc)",
+                color: "var(--bg)",
+                border: "none",
+                borderRadius: "100px",
+                cursor: "pointer",
+                willChange: "transform",
+              }}
+            >
+              Send message
+            </button>
+          </div>
           {sent ? (
             <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "var(--acc)" }}>Thanks—placeholder submit.</p>
           ) : null}

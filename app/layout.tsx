@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Unbounded } from "next/font/google";
 import "./globals.css";
-import Cursor from "@/app/components/ui/Cursor";
+import MagneticCursor from "@/app/components/ui/MagneticCursor";
 import Nav from "@/app/components/ui/Nav";
 import SmoothScroll from "@/app/components/ui/SmoothScroll";
 
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.variable} ${unbounded.variable}`}>
-        <Cursor />
+        <MagneticCursor />
         <Nav />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
