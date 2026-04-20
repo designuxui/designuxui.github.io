@@ -6,7 +6,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const BG = ["#080706", "#0d0c0a", "#111008", "#141210"] as const;
+const BG = ["#080807", "#f2efe8", "#080807", "#f2efe8"] as const;
+const FG = ["#eef1e6", "#0a0a0a", "#eef1e6", "#0a0a0a"] as const;
+const ACC = ["#c8f542", "#3d6a00", "#c8f542", "#3d6a00"] as const;
 
 const SERVICES = [
   { title: "UX Audit", blurb: "Heuristic review, flows, and a prioritized backlog so fixes ship fast.", index: "01" },
@@ -87,7 +89,7 @@ export default function Services() {
   }, []);
 
   return (
-    <section ref={rootRef} id="services" className="relative" style={{ color: "var(--fg)", fontFamily: "var(--font-dm-sans)" }}>
+    <section ref={rootRef} id="services" className="relative" style={{ fontFamily: "var(--font-dm-sans)" }}>
       {SERVICES.map((item, i) => (
         <article
           key={item.title}
@@ -95,32 +97,35 @@ export default function Services() {
           style={{
             zIndex: i + 1,
             background: BG[i],
-            borderColor: "rgba(237, 233, 224, 0.06)",
+            color: FG[i],
+borderColor: i % 2 === 0 ? "rgba(238,241,230,0.06)" : "rgba(10,10,10,0.1)",
             paddingLeft: "4rem",
             paddingRight: "4rem",
           }}
         >
+          <div className="absolute inset-0 pointer-events-none" style={{ background: i % 2 === 0 ? "rgba(3,3,3,0.85)" : "rgba(242,242,242,0.85)" }} />
           <div
-            className="service-bg-glow pointer-events-none absolute inset-0 opacity-50"
+            className="service-bg-glow pointer-events-none absolute inset-0"
             style={{
-              background: "radial-gradient(ellipse 65% 50% at 22% 28%, rgba(200,245,66,0.14) 0%, transparent 55%)",
+              background: i % 2 === 0 ? "radial-gradient(ellipse 65% 50% at 22% 28%, rgba(200,245,66,0.06) 0%, transparent 55%)" : "radial-gradient(ellipse 65% 50% at 22% 28%, rgba(74,122,0,0.06) 0%, transparent 55%)",
+              opacity: 0.7,
             }}
           />
           <div className="service-panel-inner relative mx-auto w-full max-w-4xl origin-center will-change-transform">
-            <div className="service-accent-bar mb-8 h-px w-full" style={{ background: "var(--acc)" }} />
+            <div className="service-accent-bar mb-8 h-px w-full" style={{ background: ACC[i] }} />
             <p
               className="service-num text-[0.72rem] font-bold uppercase tracking-[0.22em]"
-              style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}
+              style={{ fontFamily: "var(--font-unbounded)", color: ACC[i] }}
             >
               {item.index} — Services
             </p>
             <h2
               className="service-title mt-4 text-[clamp(2.25rem,5vw,4rem)] font-black uppercase leading-[0.95] tracking-[-0.04em]"
-              style={{ fontFamily: "var(--font-unbounded)", color: "var(--fg)" }}
+              style={{ fontFamily: "var(--font-unbounded)", color: FG[i] }}
             >
               {item.title}
             </h2>
-            <p className="service-desc mt-8 max-w-xl text-lg leading-relaxed" style={{ color: "var(--dim)" }}>
+            <p className="service-desc mt-8 max-w-xl text-lg leading-relaxed" style={{ color: i % 2 === 0 ? "rgba(238,241,230,0.7)" : "rgba(10,10,10,0.65)" }}>
               {item.blurb}
             </p>
           </div>

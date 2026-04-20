@@ -68,7 +68,7 @@ export default function Marketplace() {
           fontWeight: 700,
           letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "#c8f542",
+          color: "#ff3c00",
         }}
       >
         Marketplace
@@ -105,7 +105,7 @@ export default function Marketplace() {
                   background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 45%, transparent 100%)",
                 }}
               >
-                <span style={{ ...heading, fontSize: "1.75rem", fontWeight: 900, color: "#c8f542" }}>€{t.price}</span>
+                <span style={{ ...heading, fontSize: "1.75rem", fontWeight: 900, color: "#ff3c00" }}>€{t.price}</span>
                 <button
                   type="button"
                   data-cursor-hover
@@ -115,7 +115,7 @@ export default function Marketplace() {
                     fontSize: "0.68rem",
                     padding: "0.65rem 1.4rem",
                     borderRadius: "100px",
-                    background: "#c8f542",
+                    background: "#ff3c00",
                     color: "#080706",
                   }}
                   onClick={() => {}}

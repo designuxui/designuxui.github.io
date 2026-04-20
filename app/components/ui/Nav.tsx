@@ -76,7 +76,7 @@ export default function Nav() {
             Available
           </div>
           <Link href="/#contact" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, padding: "0.6rem 1.4rem", background: "var(--acc)", color: "var(--bg)", borderRadius: "100px", textDecoration: "none" }}>
-            Hire me
+            Open to work
           </Link>
         </div>
 

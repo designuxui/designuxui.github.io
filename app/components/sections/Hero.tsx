@@ -1,182 +1,384 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const COUNTERS = [
-  { label: "Conversion lift", value: "+40%" },
-  { label: "Revenue growth", value: "3x" },
-  { label: "Shipped", value: "50+" },
-  { label: "Experience", value: "8yr" },
-] as const;
+const TITLE_LINES = ["WHERE", "DESIGN", "MEETS", "GROWTH"];
+const PROCESS_WORDS = ["Research", "Strategy", "UX Design", "Development", "Testing", "Launch"];
+
+function wrapWords(element: HTMLElement) {
+  const text = element.innerText;
+  if (!text) return;
+  if (element.querySelector(".word")) return;
+  
+  const words = text.split(/(\s+)/);
+  
+  const fragment = document.createDocumentFragment();
+  
+  words.forEach(word => {
+    const span = document.createElement("span");
+    span.className = "word";
+    span.textContent = word;
+    fragment.appendChild(span);
+  });
+  
+  element.innerHTML = "";
+  element.appendChild(fragment);
+}
+
+function getWordIndexUnderMouse(e: MouseEvent, itemElement: HTMLElement) {
+  const words = itemElement.querySelectorAll(".word");
+  if (!words.length) return 0;
+  
+  const mouseX = e.clientX;
+  let closestIndex = 0;
+  let minDistance = Infinity;
+  
+  words.forEach((word, idx) => {
+    const rect = word.getBoundingClientRect();
+    const wordCenterX = (rect.left + rect.right) / 2;
+    const distance = Math.abs(mouseX - wordCenterX);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestIndex = idx;
+    }
+  });
+  return closestIndex;
+}
+
+function animateFromCenter(itemElement: HTMLElement, hoveredWordIndex: number) {
+  const words = itemElement.querySelectorAll(".word");
+  if (!words.length) return;
+  
+  words.forEach((word) => {
+    gsap.killTweensOf(word);
+    gsap.set(word, { clearProps: "transform,color" });
+  });
+  
+  const total = words.length;
+  const center = Math.min(total - 1, Math.max(0, hoveredWordIndex));
+  
+  const order = [center];
+  let left = center - 1;
+  let right = center + 1;
+  while (left >= 0 || right < total) {
+    if (right < total) order.push(right++);
+    if (left >= 0) order.push(left--);
+  }
+  
+  order.forEach((idx, orderPos) => {
+    const word = words[idx] as HTMLElement;
+    if (!word) return;
+    
+    const delayVal = orderPos * 0.04;
+    
+    gsap.fromTo(word, 
+      { y: 0, scale: 1, color: "#eef1e6" },
+      {
+        y: -10,
+        scale: 1.12,
+        color: "#c8f542",
+        duration: 0.2,
+        delay: delayVal,
+        ease: "back.out(0.7)",
+        onComplete: () => {
+          gsap.to(word, {
+            y: 0,
+            scale: 1,
+            color: "#eef1e6",
+            duration: 0.35,
+            ease: "elastic.out(1, 0.4)"
+          });
+        }
+      }
+    );
+  });
+}
+
+function resetWords(itemElement: HTMLElement) {
+  const words = itemElement.querySelectorAll(".word");
+  const isGreenText = itemElement.classList.contains("hero-line") && itemElement.innerText === "DESIGN";
+  const targetColor = isGreenText ? "#c8f542" : "#eef1e6";
+  words.forEach((word) => {
+    gsap.killTweensOf(word);
+    gsap.to(word, {
+      y: 0,
+      scale: 1,
+      color: targetColor,
+      duration: 0.3,
+      ease: "power2.out"
+    });
+  });
+}
 
 export default function Hero() {
-  const heroRef = useRef<HTMLElement>(null);
-  const gradRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
   const taglineRef = useRef<HTMLParagraphElement>(null);
-  const eyebrowRef = useRef<HTMLDivElement>(null);
-  const countersRef = useRef<HTMLDivElement>(null);
-  const barRef = useRef<HTMLDivElement>(null);
 
-  const onHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const hero = heroRef.current;
-    const grad = gradRef.current;
-    if (!hero || !grad) return;
-    const rect = hero.getBoundingClientRect();
-    const px = ((e.clientX - rect.left) / rect.width) * 100;
-    const py = ((e.clientY - rect.top) / rect.height) * 100;
-    grad.style.background = `radial-gradient(ellipse 85% 75% at ${px}% ${py}%, rgba(200,245,66,0.18) 0%, rgba(200,245,66,0.04) 35%, transparent 62%)`;
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = section.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+
+      const rings = section.querySelectorAll(".hero-ring");
+      rings.forEach((ring, i) => {
+        const depth = 4 + i * 3;
+        gsap.to(ring, {
+          x: (x - 0.5) * depth * (i % 2 === 0 ? 1 : -1),
+          y: (y - 0.5) * depth * 0.3,
+          duration: 0.7,
+          ease: "power2.out",
+        });
+      });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      if (eyebrowRef.current) gsap.set(eyebrowRef.current, { opacity: 0, y: 18 });
-      if (taglineRef.current) gsap.set(taglineRef.current, { opacity: 0, y: 28 });
-      if (countersRef.current) gsap.set(countersRef.current.querySelectorAll(".hero-counter"), { opacity: 0, y: 36 });
-      if (barRef.current) gsap.set(barRef.current, { opacity: 0, y: 20 });
+      const lines = titleRef.current?.querySelectorAll(".hero-line");
+      gsap.set(lines, { opacity: 0, y: 50 });
+      gsap.set(subtitleRef.current, { opacity: 0, y: 15 });
+      gsap.set(taglineRef.current, { opacity: 0, y: 15 });
+      gsap.set(".hero-btn", { opacity: 0, y: 15, scale: 0.95 });
+      gsap.set(".hero-process", { opacity: 0, y: 20, scale: 0.9 });
 
-      const split = new SplitType(headlineRef.current!, { types: "chars" });
-      gsap.set(split.chars, { opacity: 0, y: 72, rotateX: -88 });
+      const rings = sectionRef.current?.querySelectorAll(".hero-ring");
+      gsap.set(rings, { scale: 0.9, opacity: 0 });
 
       const tl = gsap.timeline({ delay: 0.15 });
-      tl.to(eyebrowRef.current, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" });
-      tl.to(
-        split.chars,
-        { opacity: 1, y: 0, rotateX: 0, duration: 0.65, ease: "power3.out", stagger: { each: 0.022, from: "start" } },
-        "-=0.25",
-      );
-      tl.to(taglineRef.current, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, "-=0.35");
-      tl.to(
-        countersRef.current?.querySelectorAll(".hero-counter") ?? [],
-        { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.09 },
-        "-=0.4",
-      );
-      tl.to(barRef.current, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, "-=0.35");
-    }, heroRef);
+      
+      tl.to(rings, { 
+        scale: 1, 
+        opacity: 1, 
+        duration: 2, 
+        stagger: 0.35, 
+        ease: "power3.inOut" 
+      });
+
+      tl.to(lines, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        stagger: 0.1,
+        ease: "power3.out",
+      }, "-=1.5");
+
+      tl.to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.5");
+      tl.to(taglineRef.current, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.4");
+      tl.to(".hero-process", { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.08, ease: "power3.out" }, "-=0.3");
+      tl.to(".hero-btn", { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "power3.out" }, "-=0.2");
+    }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  useLayoutEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const ctx = gsap.context(() => {
-      const glow = hero.querySelector(".hero-scroll-glow");
-      if (glow) {
-        gsap.to(glow, {
-          y: 100,
-          scale: 1.06,
-          ease: "none",
-          scrollTrigger: {
-            trigger: hero,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
+  useEffect(() => {
+    if (!titleRef.current) return;
+    
+    const lines = titleRef.current.querySelectorAll(".hero-line");
+    lines.forEach((line) => wrapWords(line as HTMLElement));
+
+    setTimeout(() => {
+      // Title lines hover
+      lines.forEach((line) => {
+        const el = line as HTMLElement;
+        el.style.cursor = "default";
+        
+        let hoverTimeout: ReturnType<typeof setTimeout>;
+        
+        const onMouseMove = (e: MouseEvent) => {
+          if (hoverTimeout) clearTimeout(hoverTimeout);
+          hoverTimeout = setTimeout(() => {
+            const wordIndex = getWordIndexUnderMouse(e, el);
+            animateFromCenter(el, wordIndex);
+          }, 5);
+        };
+        
+        const onMouseLeave = () => {
+          if (hoverTimeout) clearTimeout(hoverTimeout);
+          resetWords(el);
+        };
+        
+        el.addEventListener("mousemove", onMouseMove);
+        el.addEventListener("mouseleave", onMouseLeave);
+      });
+
+      // Subtitle & tagline hover (word by word)
+      const subtitleEl = subtitleRef.current;
+      const taglineEl = taglineRef.current;
+      
+      if (subtitleEl) {
+        wrapWords(subtitleEl);
+        let subTimeout: ReturnType<typeof setTimeout>;
+        const subOnMove = (e: MouseEvent) => {
+          if (subTimeout) clearTimeout(subTimeout);
+          subTimeout = setTimeout(() => {
+            animateFromCenter(subtitleEl as HTMLElement, getWordIndexUnderMouse(e, subtitleEl as HTMLElement));
+          }, 5);
+        };
+        const subOnLeave = () => { if (subTimeout) clearTimeout(subTimeout); resetWords(subtitleEl as HTMLElement); };
+        subtitleEl.addEventListener("mousemove", subOnMove);
+        subtitleEl.addEventListener("mouseleave", subOnLeave);
       }
-    }, hero);
-    return () => ctx.revert();
+      
+      if (taglineEl) {
+        wrapWords(taglineEl);
+        let tagTimeout: ReturnType<typeof setTimeout>;
+        const tagOnMove = (e: MouseEvent) => {
+          if (tagTimeout) clearTimeout(tagTimeout);
+          tagTimeout = setTimeout(() => {
+            animateFromCenter(taglineEl as HTMLElement, getWordIndexUnderMouse(e, taglineEl as HTMLElement));
+          }, 5);
+        };
+        const tagOnLeave = () => { if (tagTimeout) clearTimeout(tagTimeout); resetWords(taglineEl as HTMLElement); };
+        taglineEl.addEventListener("mousemove", tagOnMove);
+        taglineEl.addEventListener("mouseleave", tagOnLeave);
+      }
+    }, 200);
+
+    return () => {};
   }, []);
-
-  const btnMain: React.CSSProperties = {
-    fontFamily: "var(--font-unbounded)", fontWeight: 700, fontSize: "0.75rem",
-    letterSpacing: "0.1em", textTransform: "uppercase", padding: "1rem 2rem",
-    background: "var(--acc)", color: "var(--bg)", borderRadius: "100px",
-    textDecoration: "none", display: "inline-flex", alignItems: "center",
-    whiteSpace: "nowrap", transition: "background 0.2s",
-  };
-
-  const btnSec: React.CSSProperties = {
-    fontFamily: "var(--font-unbounded)", fontWeight: 400, fontSize: "0.72rem",
-    letterSpacing: "0.1em", textTransform: "uppercase", padding: "1rem 2rem",
-    background: "transparent", color: "var(--fg)", border: "1px solid var(--line)",
-    borderRadius: "3px", textDecoration: "none", whiteSpace: "nowrap",
-    transition: "border-color 0.2s",
-  };
 
   return (
     <section
-      ref={heroRef}
-      onMouseMove={onHeroMouseMove}
-      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden pb-16"
-      style={{ background: "var(--bg)", paddingTop: "120px", paddingLeft: "4rem", paddingRight: "4rem" }}
+      ref={sectionRef}
+      className="relative flex min-h-[100dvh] flex-col items-start justify-center overflow-hidden px-8 md:px-16"
+      style={{ background: "linear-gradient(135deg, #080808 0%, #0a0a0a 60%, #060606 100%)" }}
     >
-      <div
-        ref={gradRef}
-        className="pointer-events-none absolute inset-0 transition-[background] duration-75 ease-out"
-        style={{
-          background: "radial-gradient(ellipse 85% 75% at 55% 42%, rgba(200,245,66,0.14) 0%, rgba(200,245,66,0.04) 38%, transparent 62%)",
-        }}
-      />
-      <div
-        className="hero-scroll-glow pointer-events-none absolute inset-0 will-change-transform"
-        style={{
-          background: "radial-gradient(ellipse 70% 55% at 70% 55%, rgba(200,245,66,0.05) 0%, transparent 65%)",
-        }}
-      />
-      <div ref={eyebrowRef} className="relative z-[1] mb-6" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--acc)" }}>
-        UX · Product · Growth
+      <div className="hero-ring pointer-events-none absolute" style={{ width: "900px", height: "900px", border: "1px solid rgba(200,245,66,0.03)", borderRadius: "50%", top: "45%", left: "55%", transform: "translate(-50%,-50%)", filter: "blur(1px)" }} />
+      <div className="hero-ring pointer-events-none absolute" style={{ width: "550px", height: "550px", border: "1px solid rgba(200,245,66,0.018)", borderRadius: "50%", top: "45%", left: "55%", transform: "translate(-50%,-50%)" }} />
+      <div className="hero-ring pointer-events-none absolute" style={{ width: "300px", height: "300px", border: "1px solid rgba(200,245,66,0.01)", borderRadius: "50%", top: "45%", left: "55%", transform: "translate(-50%,-50%)" }} />
+      
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 45% 25% at 82% 8%, rgba(200,245,66,0.02) 0%, transparent 30%)" }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 35% 20% at 12% 88%, rgba(200,245,66,0.012) 0%, transparent 20%)" }} />
+
+      <div ref={titleRef} className="relative z-10">
+        <h1
+          className="flex flex-col items-start"
+          style={{
+            fontFamily: "var(--font-unbounded)",
+            fontWeight: 900,
+            fontSize: "clamp(1.8rem, 6vw, 4.5rem)",
+            lineHeight: 0.92,
+            letterSpacing: "-0.05em",
+          }}
+        >
+          {TITLE_LINES.map((line, lineIdx) => (
+            <span 
+              key={lineIdx} 
+              className="hero-line block cursor-default"
+              style={{ 
+                color: lineIdx === 1 ? "#c8f542" : "#eef1e6",
+              }}
+            >
+              {line}
+            </span>
+          ))}
+        </h1>
       </div>
-      <h1
-        ref={headlineRef}
-        className="relative z-[1]"
+
+      <p
+        ref={subtitleRef}
+        className="hero-line hero-subtitle relative z-10 mt-10"
         style={{
           fontFamily: "var(--font-unbounded)",
-          fontWeight: 900,
-          fontSize: "clamp(3rem, 9vw, 10rem)",
-          lineHeight: 0.88,
-          letterSpacing: "-0.03em",
-          color: "var(--fg)",
-          perspective: "1200px",
+          fontWeight: 600,
+          fontSize: "clamp(0.8rem, 1.3vw, 1.1rem)",
+          color: "#eef1e6",
+          letterSpacing: "-0.015em",
+          lineHeight: 1.5,
         }}
       >
-        WHERE<br />
-        <span style={{ color: "transparent", WebkitTextStroke: "1.5px var(--fg)" }}>DESIGN</span>
-        <br />
-        MEETS<br />
-        <span style={{ color: "var(--acc)" }}>GROWTH</span>
-      </h1>
-      <p
-        ref={taglineRef}
-        className="relative z-[1] mt-8 max-w-[720px]"
-        style={{ fontFamily: "var(--font-unbounded)", fontWeight: 300, fontSize: "clamp(1.1rem, 2vw, 1.8rem)", color: "var(--fg)", letterSpacing: "-0.01em", lineHeight: 1.3 }}
-      >
-        One specialist bridging{" "}
-        <strong style={{ color: "var(--acc)", fontWeight: 400 }}>UX, product strategy</strong> and sales.
+        I fix how products sell — from first click to closed deal
       </p>
 
-      <div ref={countersRef} className="relative z-[1] mt-12 grid w-full max-w-5xl grid-cols-2 gap-8 sm:grid-cols-4">
-        {COUNTERS.map((c) => (
-          <div key={c.value} className="hero-counter">
-            <span className="block" style={{ fontFamily: "var(--font-unbounded)", fontSize: "clamp(2.25rem, 5vw, 3.75rem)", fontWeight: 900, letterSpacing: "-0.04em", color: "var(--acc)", lineHeight: 1 }}>
-              {c.value}
-            </span>
-            <span className="mt-2 block text-xs uppercase tracking-[0.16em]" style={{ color: "var(--dim)" }}>
-              {c.label}
-            </span>
-          </div>
+      <p
+        ref={taglineRef}
+        className="hero-tagline relative z-10 mt-2"
+        style={{
+          fontFamily: "var(--font-dm-sans)",
+          fontSize: "clamp(0.75rem, 0.9vw, 0.85rem)",
+          color: "rgba(238,241,230,0.4)",
+          letterSpacing: "-0.01em",
+          lineHeight: 1.6,
+        }}
+      >
+        Bridging the gap between UX, product and revenue.
+      </p>
+
+      <div className="relative z-10 mt-10 flex flex-wrap gap-x-6 gap-y-3 max-w-xl" style={{ perspective: "1000px" }}>
+        {PROCESS_WORDS.map((word, i) => (
+          <span
+            key={word}
+            className="hero-process"
+            style={{
+              fontFamily: "var(--font-unbounded)",
+              fontSize: "clamp(0.7rem, 1.2vw, 0.95rem)",
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: i === 2 ? "#c8f542" : "rgba(238,241,230,0.5)",
+            }}
+          >
+            {word}
+          </span>
         ))}
       </div>
 
-      <div ref={barRef} className="relative z-[1] mt-12 grid max-w-5xl grid-cols-1 items-center gap-8 border-t border-[var(--line)] pt-8 lg:grid-cols-[1fr_auto]">
-        <div className="flex flex-wrap gap-10">
-          {[{ label: "Availability", value: "Open to work" }, { label: "Location", value: "Remote worldwide" }, { label: "Focus", value: "SaaS · eCommerce · B2B" }].map((item) => (
-            <div key={item.label}>
-              <span className="mb-1 block text-[0.65rem] uppercase tracking-[0.14em]" style={{ color: "var(--dim)" }}>{item.label}</span>
-              <span className="text-[0.95rem]" style={{ color: "var(--fg)" }}>{item.value}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-shrink-0 flex-wrap gap-4">
-          <a href="#contact" data-cursor style={btnMain}>Start a project</a>
-          <a href="#services" data-cursor style={btnSec}>Services</a>
-        </div>
+      <div className="relative z-10 mt-8 flex gap-3">
+        <a
+          href="#contact"
+          className="hero-btn"
+          style={{
+            fontFamily: "var(--font-unbounded)",
+            fontWeight: 700,
+            fontSize: "0.65rem",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "0.85rem 1.8rem",
+            background: "#c8f542",
+            color: "#080807",
+            borderRadius: "100px",
+            textDecoration: "none",
+          }}
+        >
+          Contact
+        </a>
+        <a
+          href="#about"
+          className="hero-btn"
+          style={{
+            fontFamily: "var(--font-unbounded)",
+            fontWeight: 400,
+            fontSize: "0.62rem",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "0.85rem 1.8rem",
+            background: "transparent",
+            color: "#eef1e6",
+            border: "1px solid rgba(238,241,230,0.1)",
+            borderRadius: "100px",
+            textDecoration: "none",
+          }}
+        >
+          About
+        </a>
+      </div>
+
+      <div className="absolute bottom-8 left-8 md:left-16 flex flex-col items-center gap-3" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.48rem", letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(238,241,230,0.1)" }}>
+        <span>Scroll</span>
+        <div className="w-[1px] h-8" style={{ background: "linear-gradient(to bottom, rgba(200,245,66,0.2), transparent)" }} />
       </div>
     </section>
   );

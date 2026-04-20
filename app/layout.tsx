@@ -4,6 +4,7 @@ import "./globals.css";
 import MagneticCursor from "@/app/components/ui/MagneticCursor";
 import Nav from "@/app/components/ui/Nav";
 import SmoothScroll from "@/app/components/ui/SmoothScroll";
+import ColorTransitions from "@/app/components/ui/ColorTransitions";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body className={`${dmSans.variable} ${unbounded.variable}`}>
         <MagneticCursor />
         <Nav />
+        <ColorTransitions />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

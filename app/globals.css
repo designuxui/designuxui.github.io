@@ -1,49 +1,65 @@
 @import "tailwindcss";
 
+/* ── Dark theme (default) ── */
 :root {
-  --bg: #080706;
-  --fg: #ede9e0;
+  --bg: #030303;
+  --bg-light: #f2efe8;
+  --fg: #eef1e6;
+  --fg-dark: #0a0a0a;
   --acc: #c8f542;
-  --dim: rgba(237, 233, 224, 0.7);
-  --line: rgba(237, 233, 224, 0.09);
-  --card: rgba(237, 233, 224, 0.03);
-  --glass: rgba(237, 233, 224, 0.04);
-  --glass-border: rgba(237, 233, 224, 0.08);
+  --acc-light: #d4f566;
+  --dim: rgba(238, 241, 230, 0.55);
+  --dim-dark: rgba(10, 10, 10, 0.55);
+  --line: rgba(238, 241, 230, 0.08);
+  --line-dark: rgba(10, 10, 10, 0.1);
+  --card: rgba(238, 241, 230, 0.03);
+  --card-dark: rgba(200, 245, 66, 0.08);
+  --glow: rgba(200, 245, 66, 0.15);
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-fg: var(--fg);
   --color-acc: var(--acc);
-  --color-dim: var(--dim);
-  --color-line: var(--line);
 }
 
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: auto; /* Lenis возьмёт управление */
+  scroll-behavior: auto;
 }
 
 body {
-  margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-dm-sans), "DM Sans", sans-serif;
+  font-family: var(--font-dm-sans, 'DM Sans', sans-serif);
   font-size: 18px;
   line-height: 1.65;
   overflow-x: hidden;
+  /* smooth bg transitions driven by GSAP */
+  transition: background-color 0.6s ease;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  html.custom-cursor body,
-  html.magnetic-cursor body {
-    cursor: none;
-  }
+/* Light sections override */
+.section-light {
+  background: var(--bg-light);
+  color: var(--fg-dark);
+}
+.section-light .sec-label,
+.section-light .acc-text {
+  color: #4a7a00;
+}
+.section-light .dim-text {
+  color: var(--dim-dark);
+}
+.section-light .border-line {
+  border-color: var(--line-dark);
 }
 
 ::selection {
@@ -55,4 +71,65 @@ body {
   outline: 2px solid var(--acc);
   outline-offset: 3px;
   border-radius: 2px;
+}
+
+/* ── Ticker animation ── */
+@keyframes tick {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Dot pulse ── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.9); opacity: 0.35; }
+}
+
+/* ── Cursor ── */
+#bridge-cursor-dot,
+#bridge-cursor-ring {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+#bridge-cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--acc);
+  mix-blend-mode: difference;
+}
+#bridge-cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(200, 245, 66, 0.4);
+  background: transparent;
+  z-index: 9998;
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  #bridge-cursor-dot,
+  #bridge-cursor-ring {
+    display: none !important;
+  }
+}
+
+/* ── Noise overlay (subtle texture like madewithgsap) ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ── Smooth section transitions ── */
+section, div[data-section] {
+  position: relative;
+  z-index: 1;
 }

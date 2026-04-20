@@ -8,8 +8,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const section: React.CSSProperties = {
   padding: "7rem 4rem",
-  background: "var(--bg)",
-  color: "var(--fg)",
+  background: "#f5f2eb",
+  color: "#0a0a0a",
   fontFamily: "var(--font-dm-sans)",
 };
 
@@ -19,7 +19,7 @@ const eyebrow: React.CSSProperties = {
   fontWeight: 700,
   letterSpacing: "0.22em",
   textTransform: "uppercase",
-  color: "var(--acc)",
+  color: "#c8f542",
   marginBottom: "3rem",
 };
 
@@ -30,7 +30,7 @@ const labelStyle: React.CSSProperties = {
   fontWeight: 700,
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "var(--dim)",
+  color: "rgba(10, 10, 10, 0.55)",
   marginBottom: "0.5rem",
 };
 
@@ -39,9 +39,9 @@ const fieldStyle: React.CSSProperties = {
   padding: "0.85rem 1rem",
   fontFamily: "var(--font-dm-sans)",
   fontSize: "1rem",
-  color: "var(--fg)",
-  background: "var(--card)",
-  border: "1px solid var(--line)",
+  color: "#0a0a0a",
+  background: "rgba(10, 10, 10, 0.02)",
+  border: "1px solid rgba(10, 10, 10, 0.08)",
   borderRadius: "4px",
   outline: "none",
 };
@@ -122,7 +122,8 @@ export default function Contact() {
   }
 
   return (
-    <section ref={sectionRef} id="contact" style={section}>
+    <section ref={sectionRef} id="contact" className="relative overflow-hidden" style={section}>
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,245,66,0.1) 0%, transparent 50%)" }} />
       <p className="contact-reveal" style={eyebrow}>
         Contact
       </p>
@@ -136,11 +137,12 @@ export default function Contact() {
             letterSpacing: "-0.03em",
             lineHeight: 1.1,
             marginBottom: "1rem",
+            color: "#0a0a0a",
           }}
         >
           Start a project
         </h2>
-        <p className="contact-reveal" style={{ fontSize: "1.05rem", lineHeight: 1.65, color: "var(--dim)", marginBottom: "2.5rem" }}>
+        <p className="contact-reveal" style={{ fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(10, 10, 10, 0.55)", marginBottom: "2.5rem" }}>
           Placeholder form—wire this to your API or form provider when ready.
         </p>
         <form className="contact-reveal" onSubmit={handleSubmit}>
@@ -174,8 +176,8 @@ export default function Contact() {
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
                 padding: "1rem 2rem",
-                background: "var(--acc)",
-                color: "var(--bg)",
+                background: "#c8f542",
+                color: "#0a0a0a",
                 border: "none",
                 borderRadius: "100px",
                 cursor: "pointer",
@@ -186,7 +188,7 @@ export default function Contact() {
             </button>
           </div>
           {sent ? (
-            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "var(--acc)" }}>Thanks—placeholder submit.</p>
+            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#c8f542" }}>Thanks—placeholder submit.</p>
           ) : null}
         </form>
       </div>

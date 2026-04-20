@@ -61,12 +61,15 @@ export default function Cases() {
     <section
       ref={sectionRef}
       id="cases"
+      className="relative overflow-hidden"
       style={{
         background: "var(--bg)",
         color: "var(--fg)",
         fontFamily: "var(--font-dm-sans)",
       }}
     >
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 10% 80%, rgba(255,60,0,0.12) 0%, transparent 50%)" }} />
+      <div className="pointer-events-none absolute bottom-0 right-0" style={{ width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,60,0,0.08) 0%, transparent 60%)", filter: "blur(50px)" }} />
       <div ref={pinRef} className="flex h-[100dvh] flex-col justify-center overflow-hidden" style={{ paddingLeft: "4rem", paddingRight: "4rem" }}>
         <header className="mb-10 shrink-0">
           <p className="mb-4 text-[0.72rem] font-bold uppercase tracking-[0.22em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}>

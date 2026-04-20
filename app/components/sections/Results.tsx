@@ -6,121 +6,152 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ACCENT = "#c8f542";
-
 const STATS = [
-  { end: 40, prefix: "+", suffix: "%", label: "conversion rate" },
-  { end: 3, prefix: "", suffix: "x", label: "revenue growth" },
-  { end: 50, prefix: "", suffix: "+", label: "projects" },
-  { end: 8, prefix: "", suffix: "", label: "years experience" },
-] as const;
+  { prefix: "+", value: 40, suffix: "%", label: "Conversion lift" },
+  { prefix: "",  value: 3,  suffix: "x", label: "Revenue growth" },
+  { prefix: "",  value: 50, suffix: "+", label: "Projects shipped" },
+  { prefix: "",  value: 8,  suffix: "yr", label: "Experience" },
+];
 
 export default function Results() {
   const sectionRef = useRef<HTMLElement>(null);
-  const numberRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const numsRef = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
+      // Heading reveal
+      gsap.from(".results-heading", {
+        opacity: 0,
+        y: 40,
+        duration: 0.8,
+        ease: "power3.out",
         scrollTrigger: {
-          trigger: section,
-          start: "top 82%",
-          toggleActions: "play none none none",
+          trigger: sectionRef.current,
+          start: "top 70%",
+          once: true,
         },
       });
 
-      STATS.forEach((stat, i) => {
-        const el = numberRefs.current[i];
+      // Counter animation
+      numsRef.current.forEach((el, i) => {
         if (!el) return;
-
-        const state = { value: 0 };
-        tl.to(
-          state,
+        const stat = STATS[i];
+        gsap.fromTo(
+          el,
+          { textContent: "0" },
           {
-            value: stat.end,
-            duration: 1.35,
+            textContent: stat.value,
+            duration: 1.4,
             ease: "power2.out",
-            onUpdate: () => {
-              const n = Math.round(state.value);
-              el.textContent = `${stat.prefix}${n}${stat.suffix}`;
+            delay: i * 0.1,
+            snap: { textContent: 1 },
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 65%",
+              once: true,
             },
-          },
-          i * 0.12,
+            onUpdate() {
+              if (!el) return;
+              const v = Math.round(parseFloat(el.textContent || "0"));
+              el.textContent = stat.prefix + v + stat.suffix;
+            },
+          }
         );
       });
-    }, section);
+
+      // Cards stagger
+      gsap.from(".result-card", {
+        opacity: 0,
+        y: 50,
+        stagger: 0.12,
+        duration: 0.7,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 70%",
+          once: true,
+        },
+      });
+    }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  const font: React.CSSProperties = {
-    fontFamily: "var(--font-unbounded)",
-  };
-
   return (
     <section
-      ref={sectionRef}
       id="results"
-      className="relative py-20 lg:py-28"
+      ref={sectionRef}
+      className="relative overflow-hidden"
       style={{
-        background: "#080706",
-        borderTop: "1px solid rgba(237, 233, 224, 0.09)",
-        paddingLeft: "4rem",
-        paddingRight: "4rem",
+        background: "#f5f2eb",
+        color: "#0a0a0a",
+        padding: "7rem 4rem",
+        borderTop: "1px solid rgba(10,10,10,0.08)",
       }}
     >
-      <div className="mx-auto max-w-6xl">
-        <p
-          className="mb-12 lg:mb-16"
-          style={{
-            ...font,
-            fontSize: "0.72rem",
-            fontWeight: 700,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: ACCENT,
-          }}
-        >
-          Results
-        </p>
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
-          {STATS.map((stat, i) => (
-            <div key={stat.label} className="flex flex-col gap-3">
-              <span
-                ref={(node) => {
-                  numberRefs.current[i] = node;
-                }}
-                style={{
-                  ...font,
-                  fontWeight: 900,
-                  fontSize: "clamp(2.5rem, 6vw, 3.75rem)",
-                  lineHeight: 1,
-                  letterSpacing: "-0.03em",
-                  color: ACCENT,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-                aria-label={`${stat.prefix}${stat.end}${stat.suffix} ${stat.label}`}
-              >
-                {stat.prefix}0{stat.suffix}
-              </span>
-              <span
-                style={{
-                  ...font,
-                  fontWeight: 300,
-                  fontSize: "0.95rem",
-                  letterSpacing: "-0.01em",
-                  color: "rgba(237, 233, 224, 0.75)",
-                  maxWidth: "14rem",
-                }}
-              >
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </div>
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 40% at 20% 60%, rgba(255,60,0,0.08) 0%, transparent 50%)" }} />
+      <p
+        className="results-heading"
+        style={{
+          fontFamily: "var(--font-unbounded)",
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          color: "#4a7a00",
+          marginBottom: "4rem",
+        }}
+      >
+        Results
+      </p>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "1px",
+          background: "rgba(10,10,10,0.1)",
+          border: "1px solid rgba(10,10,10,0.1)",
+        }}
+      >
+        {STATS.map((stat, i) => (
+          <div
+            key={stat.label}
+            className="result-card"
+            style={{
+              background: "#f5f2eb",
+              padding: "3rem 2.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.6rem",
+            }}
+          >
+            <span
+              ref={el => { numsRef.current[i] = el; }}
+              style={{
+                fontFamily: "var(--font-unbounded)",
+                fontWeight: 900,
+                fontSize: "clamp(2.5rem, 5vw, 4rem)",
+                lineHeight: 1,
+                letterSpacing: "-0.04em",
+                color: "#0a0a0a",
+              }}
+            >
+              {stat.prefix}0{stat.suffix}
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.7rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.5)",
+              }}
+            >
+              {stat.label}
+            </span>
+          </div>
+        ))}
       </div>
     </section>
   );

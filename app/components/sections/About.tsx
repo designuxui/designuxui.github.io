@@ -81,6 +81,7 @@ export default function About() {
     <section
       ref={rootRef}
       id="about"
+      className="relative overflow-hidden"
       style={{
         padding: "7rem 4rem",
         background: "var(--bg)",
@@ -88,6 +89,8 @@ export default function About() {
         fontFamily: "var(--font-dm-sans)",
       }}
     >
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 50% at 80% 20%, rgba(200,245,66,0.1) 0%, transparent 50%)" }} />
+      <div className="pointer-events-none absolute -right-32 top-1/4" style={{ width: "400px", height: "400px", borderRadius: "50%", background: "radial-gradient(circle, rgba(200,245,66,0.04) 0%, transparent 70%)", filter: "blur(40px)" }} />
       <p
         className="mb-12"
         style={{
