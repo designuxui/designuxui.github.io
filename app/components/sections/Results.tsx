@@ -5,72 +5,52 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const STATS = [
-  { prefix: "+", value: 40, suffix: "%", label: "Conversion lift" },
-  { prefix: "",  value: 3,  suffix: "x", label: "Revenue growth" },
-  { prefix: "",  value: 50, suffix: "+", label: "Projects shipped" },
-  { prefix: "",  value: 8,  suffix: "yr", label: "Experience" },
+  { value: "25–40%", label: "Conversion improvement", sub: "UX & funnel fixes" },
+  { value: "+20%",   label: "Faster deal cycles",     sub: "B2B sales optimization" },
+  { value: "50+",    label: "Projects delivered",     sub: "B2B & B2C" },
+  { value: "5+",     label: "Years experience",       sub: "Sales, UX & product" },
+  { value: "3×",     label: "Disciplines",            sub: "UX + Product + Growth" },
 ];
 
 export default function Results() {
   const sectionRef = useRef<HTMLElement>(null);
-  const numsRef = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".results-heading", {
-        opacity: 0, y: 40, duration: 0.8, ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 70%", once: true },
-      });
-
       gsap.from(".result-card", {
-        opacity: 0, y: 50, stagger: 0.12, duration: 0.7, ease: "power3.out",
+        opacity: 0, y: 60, stagger: 0.1, duration: 0.8, ease: "power3.out",
         scrollTrigger: { trigger: sectionRef.current, start: "top 70%", once: true },
       });
-
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top 65%",
-        once: true,
-        onEnter: () => {
-          numsRef.current.forEach((el, i) => {
-            if (!el) return;
-            const stat = STATS[i];
-            const obj = { val: 0 };
-            gsap.to(obj, {
-              val: stat.value,
-              duration: 1.6,
-              ease: "power2.out",
-              delay: i * 0.12,
-              onUpdate() {
-                el.textContent = stat.prefix + Math.round(obj.val) + stat.suffix;
-              },
-            });
-          });
-        },
+      gsap.from(".results-label", {
+        opacity: 0, y: 20, duration: 0.6, ease: "power3.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 75%", once: true },
       });
     }, sectionRef);
-
     return () => ctx.revert();
   }, []);
 
   return (
     <section ref={sectionRef} id="results" className="relative overflow-hidden"
-      style={{ background: "#f5f2eb", color: "#0a0a0a", padding: "7rem 4rem", borderTop: "1px solid rgba(10,10,10,0.08)" }}>
+      style={{ background: "#0a0a0a", color: "#eef1e6", padding: "7rem 4rem", borderTop: "1px solid rgba(238,241,230,0.06)" }}>
       <div className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse 60% 40% at 20% 60%, rgba(200,245,66,0.08) 0%, transparent 50%)" }} />
-      <p className="results-heading" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "#4a7a00", marginBottom: "4rem" }}>
+        style={{ background: "radial-gradient(ellipse 70% 50% at 10% 50%, rgba(200,245,66,0.07) 0%, transparent 55%)" }} />
+      <p className="results-label" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--acc)", marginBottom: "4rem" }}>
         Results
       </p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "rgba(10,10,10,0.1)", border: "1px solid rgba(10,10,10,0.1)" }}>
-        {STATS.map((stat, i) => (
-          <div key={stat.label} className="result-card"
-            style={{ background: "#f5f2eb", padding: "3rem 2.5rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-            <span ref={el => { numsRef.current[i] = el; }}
-              style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(2.5rem, 5vw, 4rem)", lineHeight: 1, letterSpacing: "-0.04em", color: "#0a0a0a" }}>
-              {stat.prefix}0{stat.suffix}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "1px", background: "rgba(238,241,230,0.06)" }}>
+        {STATS.map((s) => (
+          <div key={s.label} className="result-card"
+            style={{ background: "#0a0a0a", padding: "2.5rem 2rem", display: "flex", flexDirection: "column", gap: "0.5rem", transition: "background 0.25s" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(200,245,66,0.04)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "#0a0a0a")}>
+            <span style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(2rem, 4vw, 3.2rem)", lineHeight: 1, letterSpacing: "-0.04em", color: "var(--acc)" }}>
+              {s.value}
             </span>
-            <span style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(10,10,10,0.5)" }}>
-              {stat.label}
+            <span style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.75rem", fontWeight: 700, color: "#eef1e6", letterSpacing: "-0.01em", marginTop: "0.5rem" }}>
+              {s.label}
+            </span>
+            <span style={{ fontSize: "0.72rem", color: "rgba(238,241,230,0.45)", fontFamily: "var(--font-dm-sans)" }}>
+              {s.sub}
             </span>
           </div>
         ))}

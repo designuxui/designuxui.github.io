@@ -7,13 +7,14 @@ export default function Nav() {
   const navRef = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [lang, setLang] = useState<"EN"|"PL">("EN");
 
   useEffect(() => {
     gsap.set(navRef.current, { opacity: 0, y: -20 });
     gsap.to(navRef.current, { opacity: 1, y: 0, duration: 0.8, delay: 0.3, ease: "power3.out" });
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const links = [
@@ -36,24 +37,25 @@ export default function Nav() {
           opacity: 0,
         }}>
 
-        {/* Logo with double-letter hover effect like madewithgsap */}
-        <Link href="/" className="logo-wrap" style={{ textDecoration: "none", position: "relative", overflow: "hidden", display: "inline-block" }}>
-          <span className="logo-a" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--fg)", display: "block", transition: "transform 0.3s cubic-bezier(0.76,0,0.24,1), opacity 0.3s" }}>
+        {/* Logo with slide-up hover */}
+        <Link href="/" className="nav-logo" style={{ textDecoration: "none", position: "relative", display: "inline-block", overflow: "hidden", height: "1.3em" }}>
+          <span className="nav-logo-a" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--fg)", display: "block", transition: "transform 0.4s cubic-bezier(0.76,0,0.24,1)" }}>
             BRIDGE<span style={{ color: "var(--acc)" }}>.</span>
           </span>
-          <span className="logo-b" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--acc)", display: "block", position: "absolute", top: "100%", left: 0, transition: "transform 0.3s cubic-bezier(0.76,0,0.24,1), opacity 0.3s" }}>
+          <span className="nav-logo-b" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--acc)", display: "block", position: "absolute", top: "100%", left: 0, transition: "transform 0.4s cubic-bezier(0.76,0,0.24,1)" }}>
             BRIDGE<span style={{ color: "var(--fg)" }}>.</span>
           </span>
         </Link>
 
-        {/* Desktop links with slide-up hover */}
+        {/* Desktop nav links with slide-up hover */}
         <ul className="hidden md:flex gap-9 list-none">
           {links.map((link) => (
-            <li key={link.href} style={{ overflow: "hidden", position: "relative" }}>
-              <Link href={link.href}
-                className="nav-link-wrap"
-                style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--dim)", textDecoration: "none", display: "block", transition: "color 0.2s" }}>
-                <span style={{ display: "block", transition: "transform 0.3s cubic-bezier(0.76,0,0.24,1)" }}>
+            <li key={link.href} style={{ overflow: "hidden", height: "1.2em" }}>
+              <Link href={link.href} className="nav-item" style={{ textDecoration: "none", display: "block" }}>
+                <span className="nav-item-a" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--dim)", display: "block", transition: "transform 0.35s cubic-bezier(0.76,0,0.24,1), color 0.2s" }}>
+                  {link.label}
+                </span>
+                <span className="nav-item-b" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--acc)", display: "block", position: "absolute", transform: "translateY(0)", transition: "transform 0.35s cubic-bezier(0.76,0,0.24,1)" }}>
                   {link.label}
                 </span>
               </Link>
@@ -61,17 +63,24 @@ export default function Nav() {
           ))}
         </ul>
 
-        <div className="hidden md:flex items-center gap-5">
+        {/* Right: Available + Lang switcher */}
+        <div className="hidden md:flex items-center gap-4">
           <div style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--acc)", fontFamily: "var(--font-unbounded)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--acc)", display: "inline-block", animation: "pulse 2.2s ease infinite" }} />
-            Available
+            Open to work
           </div>
-          <Link href="/#contact"
-            style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "0.6rem 1.4rem", background: "var(--acc)", color: "var(--bg)", borderRadius: 100, textDecoration: "none", transition: "background 0.2s" }}>
-            Hire me
-          </Link>
+          {/* Language switcher */}
+          <div style={{ display: "flex", border: "1px solid rgba(238,241,230,0.12)", borderRadius: 4, overflow: "hidden" }}>
+            {(["EN","PL"] as const).map(l => (
+              <button key={l} onClick={() => setLang(l)}
+                style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.58rem", fontWeight: 400, letterSpacing: "0.1em", padding: "0.4rem 0.8rem", background: lang === l ? "var(--acc)" : "transparent", color: lang === l ? "var(--bg)" : "var(--dim)", border: "none", cursor: "pointer", transition: "all 0.18s" }}>
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Burger */}
         <button className="md:hidden flex flex-col justify-between w-7 h-5 bg-transparent border-none cursor-pointer"
           onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
           {[0,1,2].map(i => (
@@ -94,18 +103,13 @@ export default function Nav() {
       )}
 
       <style jsx global>{`
-        @keyframes pulse {
-          0%,100%{transform:scale(1);opacity:1}
-          50%{transform:scale(1.9);opacity:0.35}
-        }
-        .logo-wrap:hover .logo-a {
-          transform: translateY(-100%);
-          opacity: 0;
-        }
-        .logo-wrap:hover .logo-b {
-          transform: translateY(-100%);
-          opacity: 1;
-        }
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.9);opacity:0.35} }
+        .nav-logo:hover .nav-logo-a { transform: translateY(-100%); }
+        .nav-logo:hover .nav-logo-b { transform: translateY(-100%); }
+        .nav-item:hover .nav-item-a { transform: translateY(-100%); color: var(--acc); }
+        .nav-item { position: relative; }
+        .nav-item-b { top: 100%; left: 0; position: absolute; }
+        .nav-item:hover .nav-item-b { transform: translateY(-100%); }
       `}</style>
     </>
   );

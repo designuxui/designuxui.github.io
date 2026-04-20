@@ -1,133 +1,86 @@
 "use client";
-
-import { useLayoutEffect, useRef } from "react";
+import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
 gsap.registerPlugin(ScrollTrigger);
 
-const BG = ["#080807", "#f2efe8", "#080807", "#f2efe8"] as const;
-const FG = ["#eef1e6", "#0a0a0a", "#eef1e6", "#0a0a0a"] as const;
-const ACC = ["#c8f542", "#3d6a00", "#c8f542", "#3d6a00"] as const;
-
 const SERVICES = [
-  { title: "UX Audit", blurb: "Heuristic review, flows, and a prioritized backlog so fixes ship fast.", index: "01" },
-  { title: "Product Strategy", blurb: "Positioning, roadmap alignment, and bets that connect UX to revenue.", index: "02" },
-  { title: "Conversion Optimization", blurb: "Funnel diagnostics, experiments, and landing systems that lift conversion.", index: "03" },
-  { title: "B2B Sales Systems", blurb: "CRM, sequences, and handoffs so marketing and sales stay in sync.", index: "04" },
-] as const;
+  {
+    num: "01",
+    title: "UX Audit & Conversion Optimization",
+    hook: "I audit flows and redesign them to increase conversion — not just visuals.",
+    desc: "Landing pages, checkout, onboarding — wherever your business is losing revenue. I identify friction points, redesign the flow, and measure the result. Every recommendation is backed by heuristic analysis and funnel data.",
+    tags: ["UX Audit", "Figma", "Landing Pages", "Funnel Analysis"],
+    dark: true,
+  },
+  {
+    num: "02",
+    title: "Product & Funnel Strategy",
+    hook: "I help teams prioritise features that drive revenue, not vanity metrics.",
+    desc: "Roadmap decisions backed by funnel data. Growth frameworks that connect product actions to revenue outcomes. I work with founders and PMs to cut scope noise and focus on what actually converts users to paying customers.",
+    tags: ["Roadmap", "Metrics", "Growth Frameworks"],
+    dark: false,
+  },
+  {
+    num: "03",
+    title: "B2B Sales & CRM Systems",
+    hook: "From pipeline setup to closing strategy.",
+    desc: "CRM setup, pipeline structure, deal flow — I rebuild how your sales process actually works. Whether you're running outbound or inbound, I align your CRM with how your buyers actually buy, not how the software defaults.",
+    tags: ["Salesforce", "Pipeline", "Deal Flow", "CRM"],
+    dark: true,
+  },
+];
 
 export default function Services() {
-  const rootRef = useRef<HTMLElement>(null);
-
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-
-    const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray<HTMLElement>(".service-panel");
-      const inners = gsap.utils.toArray<HTMLElement>(".service-panel-inner");
-
-      panels.forEach((panel, i) => {
-        const inner = inners[i];
-        if (!inner) return;
-
-        const bar = inner.querySelector(".service-accent-bar");
-        const num = inner.querySelector(".service-num");
-        const title = inner.querySelector(".service-title");
-        const desc = inner.querySelector(".service-desc");
-
-        if (bar) gsap.set(bar, { scaleX: 0, transformOrigin: "left center" });
-        if (num) gsap.set(num, { opacity: 0, y: 28 });
-        if (title) gsap.set(title, { opacity: 0, x: -56, skewX: -4 });
-        if (desc) gsap.set(desc, { opacity: 0, y: 32 });
-
-        const enterTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: panel,
-            start: "top 75%",
-            toggleActions: "play none none reverse",
-          },
-        });
-        if (bar) enterTl.to(bar, { scaleX: 1, duration: 0.95, ease: "power2.inOut" });
-        if (num) enterTl.to(num, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, "-=0.55");
-        if (title) enterTl.to(title, { opacity: 1, x: 0, skewX: 0, duration: 0.75, ease: "power3.out" }, "-=0.45");
-        if (desc) enterTl.to(desc, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, "-=0.4");
-
-        if (i > 0) {
-          const prev = panels[i - 1];
-          const prevInner = inners[i - 1];
-          if (prevInner) {
-            gsap.to(prevInner, {
-              scale: 0.95,
-              filter: "brightness(0.55)",
-              scrollTrigger: {
-                trigger: panel,
-                start: "top bottom",
-                end: "top top",
-                scrub: 0.55,
-              },
-            });
-          }
-          const glow = prev.querySelector(".service-bg-glow");
-          if (glow) {
-            gsap.to(glow, {
-              opacity: 0,
-              scrollTrigger: {
-                trigger: panel,
-                start: "top bottom",
-                end: "top 50%",
-                scrub: true,
-              },
-            });
-          }
-        }
+  useEffect(() => {
+    SERVICES.forEach((s, i) => {
+      const panel = document.querySelector(`.service-panel-${i}`);
+      if (!panel) return;
+      gsap.from(`.service-panel-${i} .sv-content`, {
+        opacity: 0, y: 40, duration: 0.8, ease: "power3.out",
+        scrollTrigger: { trigger: panel, start: "top 60%", once: true },
       });
-    }, root);
-
-    return () => ctx.revert();
+    });
   }, []);
 
   return (
-    <section ref={rootRef} id="services" className="relative" style={{ fontFamily: "var(--font-dm-sans)" }}>
-      {SERVICES.map((item, i) => (
-        <article
-          key={item.title}
-          className="service-panel sticky top-0 flex min-h-[100dvh] flex-col justify-center overflow-hidden border-t"
+    <section id="services" className="relative">
+      {SERVICES.map((s, i) => (
+        <article key={s.num}
+          className={`service-panel-${i} sticky top-0 flex min-h-[100dvh] flex-col justify-center overflow-hidden`}
           style={{
             zIndex: i + 1,
-            background: BG[i],
-            color: FG[i],
-borderColor: i % 2 === 0 ? "rgba(238,241,230,0.06)" : "rgba(10,10,10,0.1)",
-            paddingLeft: "4rem",
-            paddingRight: "4rem",
-          }}
-        >
-          <div className="absolute inset-0 pointer-events-none" style={{ background: i % 2 === 0 ? "rgba(3,3,3,0.85)" : "rgba(242,242,242,0.85)" }} />
-          <div
-            className="service-bg-glow pointer-events-none absolute inset-0"
-            style={{
-              background: i % 2 === 0 ? "radial-gradient(ellipse 65% 50% at 22% 28%, rgba(200,245,66,0.06) 0%, transparent 55%)" : "radial-gradient(ellipse 65% 50% at 22% 28%, rgba(74,122,0,0.06) 0%, transparent 55%)",
-              opacity: 0.7,
-            }}
-          />
-          <div className="service-panel-inner relative mx-auto w-full max-w-4xl origin-center will-change-transform">
-            <div className="service-accent-bar mb-8 h-px w-full" style={{ background: ACC[i] }} />
-            <p
-              className="service-num text-[0.72rem] font-bold uppercase tracking-[0.22em]"
-              style={{ fontFamily: "var(--font-unbounded)", color: ACC[i] }}
-            >
-              {item.index} — Services
+            background: s.dark ? "#080807" : "#f2efe8",
+            color: s.dark ? "#eef1e6" : "#0a0a0a",
+            borderTop: `1px solid ${s.dark ? "rgba(238,241,230,0.06)" : "rgba(10,10,10,0.1)"}`,
+            padding: "0 4rem",
+          }}>
+          <div className="pointer-events-none absolute inset-0"
+            style={{ background: s.dark
+              ? "radial-gradient(ellipse 60% 45% at 20% 30%, rgba(200,245,66,0.07) 0%, transparent 55%)"
+              : "radial-gradient(ellipse 60% 45% at 80% 70%, rgba(74,122,0,0.06) 0%, transparent 55%)" }} />
+
+          <div className="sv-content relative mx-auto w-full max-w-4xl">
+            <div style={{ height: 1, background: s.dark ? "#c8f542" : "#3d6a00", marginBottom: "2rem", width: "100%" }} />
+            <p style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: s.dark ? "#c8f542" : "#3d6a00", marginBottom: "1rem" }}>
+              {s.num} — Services
             </p>
-            <h2
-              className="service-title mt-4 text-[clamp(2.25rem,5vw,4rem)] font-black uppercase leading-[0.95] tracking-[-0.04em]"
-              style={{ fontFamily: "var(--font-unbounded)", color: FG[i] }}
-            >
-              {item.title}
+            <h2 style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(2rem, 4.5vw, 3.8rem)", letterSpacing: "-0.04em", lineHeight: 0.95, color: s.dark ? "#eef1e6" : "#0a0a0a", marginBottom: "1.5rem" }}>
+              {s.title}
             </h2>
-            <p className="service-desc mt-8 max-w-xl text-lg leading-relaxed" style={{ color: i % 2 === 0 ? "rgba(238,241,230,0.7)" : "rgba(10,10,10,0.65)" }}>
-              {item.blurb}
+            <p style={{ fontSize: "1.15rem", fontWeight: 600, color: s.dark ? "#c8f542" : "#3d6a00", fontStyle: "italic", marginBottom: "1.2rem", lineHeight: 1.45 }}>
+              {s.hook}
             </p>
+            <p style={{ fontSize: "1rem", color: s.dark ? "rgba(238,241,230,0.7)" : "rgba(10,10,10,0.65)", lineHeight: 1.8, maxWidth: "42rem", marginBottom: "2rem" }}>
+              {s.desc}
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {s.tags.map(tag => (
+                <span key={tag} style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.6rem", letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.3rem 0.9rem", border: `1px solid ${s.dark ? "rgba(238,241,230,0.15)" : "rgba(10,10,10,0.15)"}`, borderRadius: 2, color: s.dark ? "rgba(238,241,230,0.6)" : "rgba(10,10,10,0.55)" }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
         </article>
       ))}
