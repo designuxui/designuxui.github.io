@@ -147,15 +147,15 @@ export default function Hero() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const lines = titleRef.current?.querySelectorAll(".hero-line") ?? [];
+      const lines = Array.from(titleRef.current?.querySelectorAll(".hero-line") ?? []);
       if (lines.length) gsap.set(lines, { opacity: 0, y: 50 });
       gsap.set(subtitleRef.current, { opacity: 0, y: 15 });
       gsap.set(taglineRef.current, { opacity: 0, y: 15 });
       gsap.set(".hero-btn", { opacity: 0, y: 15, scale: 0.95 });
       gsap.set(".hero-process", { opacity: 0, y: 20, scale: 0.9 });
 
-      const rings = sectionRef.current?.querySelectorAll(".hero-ring");
-      gsap.set(rings, { scale: 0.9, opacity: 0 });
+      const rings = Array.from(sectionRef.current?.querySelectorAll(".hero-ring") ?? []);
+      if (rings.length) gsap.set(rings, { scale: 0.9, opacity: 0 });
 
       const tl = gsap.timeline({ delay: 0.15 });
       
@@ -187,7 +187,7 @@ export default function Hero() {
   useEffect(() => {
     if (!titleRef.current) return;
     
-    const lines = titleRef.current.querySelectorAll(".hero-line");
+    const lines = Array.from(titleRef.current?.querySelectorAll(".hero-line") ?? []);
     lines.forEach((line) => wrapWords(line as HTMLElement));
 
     setTimeout(() => {
