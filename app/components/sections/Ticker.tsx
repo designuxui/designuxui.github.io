@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -21,7 +21,7 @@ export default function Ticker() {
     "SaaS Growth",
   ];
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const wrap = wrapRef.current;
     const row = rowRef.current;
     if (!wrap || !row) return;

@@ -270,7 +270,7 @@ export default function Hero() {
           style={{
             fontFamily: "var(--font-unbounded)",
             fontWeight: 900,
-            fontSize: "clamp(1.8rem, 6vw, 4.5rem)",
+            fontSize: "clamp(4rem, 11vw, 11rem)",
             lineHeight: 0.92,
             letterSpacing: "-0.05em",
           }}
@@ -295,7 +295,7 @@ export default function Hero() {
         style={{
           fontFamily: "var(--font-unbounded)",
           fontWeight: 600,
-          fontSize: "clamp(0.8rem, 1.3vw, 1.1rem)",
+          fontSize: "clamp(1.1rem, 2vw, 1.8rem)",
           color: "#eef1e6",
           letterSpacing: "-0.015em",
           lineHeight: 1.5,
