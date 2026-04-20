@@ -113,7 +113,7 @@ const TextCursorProximity = forwardRef<HTMLSpanElement, TextProps>(
               // Create transformed values for each style property
               const transformedStyles = Object.entries(styles).reduce((acc, [key, value]) => {
                 if (value) {
-                  // @ts-expect-error - dynamic style transformation
+                  
                   acc[key] = useTransform(proximity, [0, 1], [value.from, value.to])
                 }
                 return acc
