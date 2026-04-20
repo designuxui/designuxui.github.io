@@ -1,99 +1,69 @@
 "use client";
-
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
 gsap.registerPlugin(ScrollTrigger);
+
+const items = ["UX Strategy","Product Strategy","Conversion Optimization","B2B Sales Systems","CRM Setup","Funnel Design","UX Audit","SaaS Growth"];
 
 export default function Ticker() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const rowRef = useRef<HTMLDivElement>(null);
-
-  const items = [
-    "UX Strategy",
-    "Product Strategy",
-    "Conversion Optimization",
-    "B2B Sales Systems",
-    "CRM Setup",
-    "Funnel Design",
-    "UX Audit",
-    "SaaS Growth",
-  ];
+  const row1Ref = useRef<HTMLDivElement>(null);
+  const row2Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
-    const row = rowRef.current;
-    if (!wrap || !row) return;
+    const row1 = row1Ref.current;
+    const row2 = row2Ref.current;
+    if (!wrap || !row1 || !row2) return;
 
-    gsap.set(wrap, { opacity: 0, y: 24 });
+    gsap.set(wrap, { opacity: 0 });
+    gsap.to(wrap, { opacity: 1, duration: 1, ease: "power3.out",
+      scrollTrigger: { trigger: wrap, start: "top 95%", once: true } });
 
-    const ctx = gsap.context(() => {
-      gsap.to(wrap, {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: wrap,
-          start: "top 95%",
-          toggleActions: "play none none reverse",
-        },
-      });
+    // Row 1 goes right, Row 2 goes left — Effect 046 style
+    const tween1 = gsap.to(row1, { xPercent: -50, ease: "none", duration: 22, repeat: -1 });
+    const tween2 = gsap.to(row2, { xPercent: 50, ease: "none", duration: 28, repeat: -1 });
 
-      gsap.to(row, {
-        xPercent: -50,
-        ease: "none",
-        duration: 26,
-        repeat: -1,
-      });
-    }, wrap);
+    // Speed up on scroll down, slow down on scroll up
+    let lastY = 0;
+    const onScroll = () => {
+      const dy = window.scrollY - lastY;
+      lastY = window.scrollY;
+      const speed = 1 + Math.abs(dy) * 0.04;
+      gsap.to(tween1, { timeScale: dy > 0 ? speed : -speed * 0.5, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+      gsap.to(tween2, { timeScale: dy > 0 ? speed : -speed * 0.5, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+      setTimeout(() => {
+        gsap.to([tween1, tween2], { timeScale: 1, duration: 1.2, ease: "power2.out", overwrite: "auto" });
+      }, 200);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
 
-    return () => ctx.revert();
+    return () => {
+      tween1.kill(); tween2.kill();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
+  const renderItems = (accent = false) =>
+    [...items, ...items].map((item, i) => (
+      <div key={i} style={{ display: "flex", alignItems: "center", gap: "2.5rem", padding: "0 2.5rem" }}>
+        <span style={{ fontFamily: "var(--font-unbounded)", fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.1em", textTransform: "uppercase", color: accent ? "rgba(200,245,66,0.5)" : "var(--dim)", whiteSpace: "nowrap" }}>
+          {item}
+        </span>
+        <span style={{ fontSize: "0.35rem", color: "var(--acc)", opacity: accent ? 1 : 0.5 }}>◆</span>
+      </div>
+    ));
+
   return (
-    <div
-      ref={wrapRef}
-      className="px-16"
-      style={{
-        borderTop: "1px solid var(--line)",
-        borderBottom: "1px solid var(--line)",
-        paddingTop: "0.8rem",
-        paddingBottom: "0.8rem",
-        overflow: "hidden",
-        background: "var(--bg)",
-      }}
-    >
-      <div
-        ref={rowRef}
-        className="flex w-max whitespace-nowrap will-change-transform"
-      >
-        {[...items, ...items].map((item, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "3rem",
-              padding: "0 3rem",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-unbounded)",
-                fontWeight: 300,
-                fontSize: "0.72rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "var(--dim)",
-              }}
-            >
-              {item}
-            </span>
-            <span style={{ fontSize: "0.4rem", color: "var(--acc)" }}>◆</span>
-          </div>
-        ))}
+    <div ref={wrapRef} style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", background: "var(--bg)", overflow: "hidden", padding: "0.6rem 0" }}>
+      {/* Row 1 — goes right */}
+      <div ref={row1Ref} className="flex w-max" style={{ marginBottom: "0.4rem" }}>
+        {renderItems(false)}
+      </div>
+      {/* Row 2 — goes left, slightly different style */}
+      <div ref={row2Ref} className="flex w-max" style={{ transform: "translateX(-50%)" }}>
+        {renderItems(true)}
       </div>
     </div>
   );
