@@ -147,8 +147,8 @@ export default function Hero() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const lines = titleRef.current?.querySelectorAll(".hero-line");
-      gsap.set(lines, { opacity: 0, y: 50 });
+      const lines = titleRef.current?.querySelectorAll(".hero-line") ?? [];
+      if (lines.length) gsap.set(lines, { opacity: 0, y: 50 });
       gsap.set(subtitleRef.current, { opacity: 0, y: 15 });
       gsap.set(taglineRef.current, { opacity: 0, y: 15 });
       gsap.set(".hero-btn", { opacity: 0, y: 15, scale: 0.95 });
