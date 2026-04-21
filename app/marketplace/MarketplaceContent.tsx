@@ -26,12 +26,20 @@ export default function MarketplaceContent() {
   const containerRef = useRef<HTMLDivElement>(null);
   const folderRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<Filter>("All");
+  const [search, setSearch] = useState<string>("");
+  const [selected, setSelected] = useState<typeof TEMPLATES[number] | null>(null);
   const cursorRef = useRef({ x: 0.5, y: 0.5 });
 
   const filtered = useMemo(() => {
     if (filter === "All") return [...TEMPLATES];
     return TEMPLATES.filter((t) => t.category === filter);
   }, [filter]);
+
+  const searched = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return filtered;
+    return filtered.filter((t) => t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
+  }, [search, filtered]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -196,7 +204,7 @@ export default function MarketplaceContent() {
             transformOrigin: "center center",
           }}
         >
-          {filtered.map((t, i) => (
+          {searched.map((t, i) => (
             <article
               key={t.id}
               className="folder-card absolute inset-0 flex flex-col overflow-hidden rounded-sm border"
@@ -235,6 +243,7 @@ export default function MarketplaceContent() {
                       border: "none",
                       cursor: "pointer",
                     }}
+                  onClick={() => setSelected(t)}
                   >
                     Buy
                   </button>
@@ -248,6 +257,25 @@ export default function MarketplaceContent() {
       <div className="pb-20 text-center" style={{ paddingBottom: "5rem", color: "rgba(237,233,224,0.5)", fontSize: "0.9rem" }}>
         Scroll to browse · Move mouse to rotate
       </div>
+      {Boolean(selected) && (
+        <div role="dialog" aria-label={`Template ${selected?.name} details`} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60 }}>
+          <div style={{ width: 560, maxWidth: "90%", background: "#111", color: "#eee", borderRadius: 12, padding: 20, boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <h3 style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "1.2rem", margin: 0 }}>{selected?.name}</h3>
+              <button onClick={() => setSelected(null)} aria-label="Close" style={{ background: "transparent", color: "#fff", border: 0, fontSize: 22, cursor: "pointer" }}>×</button>
+            </div>
+            <div style={{ display: "flex", gap: 16 }}>
+              <div style={{ flex: 1, minHeight: 180, background: selected!.gradient }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ color: "#ddd" }}>{selected?.name} - {selected?.category}</p>
+                <p style={{ color: "#bbb" }}>Price: €{selected?.price}</p>
+                <p style={{ color: "#bbb" }}>Stripe placeholder — connect Price ID</p>
+                <button style={{ marginTop: 8, padding: "0.6rem 1.2rem", borderRadius: 999, background: "#c8f542", color: "#080706", border: 0, fontWeight: 700, cursor: "pointer" }}>Proceed to Checkout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
