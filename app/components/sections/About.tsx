@@ -123,8 +123,12 @@ export default function About() {
               I work with founders and product teams to tighten UX, sharpen strategy, and build revenue systems—so you
               ship fewer handoffs and more momentum.
             </p>
+            <p className="mb-5">
+              My background spans B2B SaaS, eCommerce and agency work — I've led UX on products used by 100k+ users
+              and rebuilt sales pipelines that cut deal cycles by 20%.
+            </p>
             <p>
-              This copy will be replaced with your real story, stack, and how you like to collaborate.
+              I work remotely, move fast, and communicate in plain language — no agency overhead, no handoff delays.
             </p>
           </div>
         </div>

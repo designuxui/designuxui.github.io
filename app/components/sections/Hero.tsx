@@ -1,143 +1,77 @@
 "use client";
+
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
+
 gsap.registerPlugin(ScrollTrigger);
 
-const WORDS = ["WHERE", "DESIGN", "MEETS", "GROWTH"];
-// WHERE=cream, DESIGN=outline/ghost, MEETS=cream, GROWTH=accent green
-const STYLES: React.CSSProperties[] = [
-  { color: "#eef1e6" },
-  { color: "transparent", WebkitTextStroke: "1.5px #eef1e6" },
-  { color: "rgba(238,241,230,0.55)" },
-  { color: "#c8f542" },
-];
-
 export default function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const lines = Array.from(sectionRef.current?.querySelectorAll(".hero-line") ?? []);
-      gsap.set(lines, { opacity: 0, y: 100, skewY: 5 });
+      const split = new SplitType(headlineRef.current!, { types: "chars,words" });
       const tl = gsap.timeline({ delay: 0.2 });
-      tl.to(lines, { opacity: 1, y: 0, skewY: 0, duration: 1, ease: "power4.out", stagger: 0.1 });
-      gsap.set(".hero-sub", { opacity: 0, y: 20 });
-      tl.to(".hero-sub", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, "-=0.4");
-      gsap.set(".hero-btn", { opacity: 0, x: 20 });
-      tl.to(".hero-btn", { opacity: 1, x: 0, duration: 0.6, ease: "back.out(1.5)", stagger: 0.12 }, "-=0.3");
-
-      // Letter proximity effect — repel on hover
-      const letters = Array.from(sectionRef.current?.querySelectorAll(".hl") ?? []);
-      const xQ = letters.map(el => gsap.quickTo(el, "x", { duration: 0.45, ease: "power3.out" }));
-      const yQ = letters.map(el => gsap.quickTo(el, "y", { duration: 0.45, ease: "power3.out" }));
-
-      const onMove = (e: MouseEvent) => {
-        letters.forEach((el, i) => {
-          const r = (el as HTMLElement).getBoundingClientRect();
-          const cx = r.left + r.width / 2;
-          const cy = r.top + r.height / 2;
-          const dx = e.clientX - cx;
-          const dy = e.clientY - cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const radius = 130;
-          if (dist < radius) {
-            const f = (1 - dist / radius) * 35;
-            xQ[i](-dx / dist * f);
-            yQ[i](-dy / dist * f);
-          } else {
-            xQ[i](0); yQ[i](0);
-          }
-        });
-      };
-      window.addEventListener("mousemove", onMove);
-      return () => window.removeEventListener("mousemove", onMove);
-    }, sectionRef);
-
-    // Tubes cursor animation
-    let app: { dispose?: () => void } | null = null;
-    const t = setTimeout(() => {
-      import("https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js" as string)
-        .then((mod: { default: (canvas: HTMLCanvasElement, opts: object) => { dispose?: () => void } }) => {
-          if (canvasRef.current) {
-            app = mod.default(canvasRef.current, {
-              tubes: {
-                colors: ["#c8f542", "#a3d900", "#e0ff60"],
-                lights: { intensity: 180, colors: ["#c8f542", "#7a9a05", "#d4ff50", "#4a7a00"] }
-              }
-            });
-          }
-        }).catch(() => {});
-    }, 300);
-
-    return () => {
-      ctx.revert();
-      clearTimeout(t);
-      if (app?.dispose) app.dispose();
-    };
+      tl.fromTo(eyebrowRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" });
+      tl.fromTo(split.chars, { opacity: 0, y: 60, rotateX: -90 }, { opacity: 1, y: 0, rotateX: 0, duration: 0.7, ease: "power3.out", stagger: 0.025 }, "-=0.3");
+      tl.fromTo(taglineRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.4");
+      tl.fromTo(barRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.3");
+    }, heroRef);
+    return () => ctx.revert();
   }, []);
 
+  const btnMain: React.CSSProperties = {
+    fontFamily: "var(--font-unbounded)", fontWeight: 700, fontSize: "0.75rem",
+    letterSpacing: "0.1em", textTransform: "uppercase", padding: "1rem 2rem",
+    background: "var(--acc)", color: "var(--bg)", borderRadius: "100px",
+    textDecoration: "none", display: "inline-flex", alignItems: "center",
+    whiteSpace: "nowrap", transition: "background 0.2s",
+  };
+
+  const btnSec: React.CSSProperties = {
+    fontFamily: "var(--font-unbounded)", fontWeight: 400, fontSize: "0.72rem",
+    letterSpacing: "0.1em", textTransform: "uppercase", padding: "1rem 2rem",
+    background: "transparent", color: "var(--fg)", border: "1px solid var(--line)",
+    borderRadius: "3px", textDecoration: "none", whiteSpace: "nowrap",
+    transition: "border-color 0.2s",
+  };
+
   return (
-    <section ref={sectionRef} id="hero"
-      className="relative min-h-[100dvh] overflow-hidden"
-      style={{ background: "#080808", display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", padding: "120px 4rem 4rem", gap: "2rem" }}>
-
-      {/* Tubes cursor canvas */}
-      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" style={{ opacity: 0.7 }} />
-
-      {/* Decorative rings */}
-      {[900, 580, 310].map((s, i) => (
-        <div key={s} className="hero-ring pointer-events-none absolute"
-          style={{ width: s, height: s, border: `1px solid rgba(200,245,66,${0.04 - i * 0.01})`, borderRadius: "50%", top: "48%", left: "62%", transform: "translate(-50%,-50%)" }} />
-      ))}
-      <div className="pointer-events-none absolute inset-0"
-        style={{ background: "radial-gradient(ellipse 50% 38% at 65% 48%, rgba(200,245,66,0.055) 0%, transparent 60%)" }} />
-
-      {/* LEFT: Headline + subtitle */}
-      <div className="relative z-10">
-        <h1 style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(4rem, 10vw, 10rem)", lineHeight: 0.9, letterSpacing: "-0.05em" }}>
-          {WORDS.map((word, wi) => (
-            <div key={word} className="hero-line" style={{ display: "block", overflow: "hidden" }}>
-              <span style={{ display: "inline-flex" }}>
-                {word.split("").map((ch, ci) => (
-                  <span key={ci} className="hl"
-                    style={{ display: "inline-block", willChange: "transform", cursor: "default", ...STYLES[wi] }}>
-                    {ch}
-                  </span>
-                ))}
-              </span>
+    <section ref={heroRef} className="relative min-h-screen flex flex-col justify-center px-12 pt-24 pb-8 overflow-hidden" style={{ background: "var(--bg)" }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(200,245,66,0.06) 0%, transparent 70%)" }} />
+      <div ref={eyebrowRef} className="mb-6 opacity-0" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--acc)" }}>
+        UX · Product · Growth
+      </div>
+      <h1 ref={headlineRef} style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(4rem, 11vw, 12rem)", lineHeight: 0.88, letterSpacing: "-0.03em", color: "var(--fg)" }}>
+        WHERE<br />
+        <span style={{ color: "transparent", WebkitTextStroke: "1.5px var(--fg)" }}>DESIGN</span><br />
+        MEETS<br />
+        <span style={{ color: "var(--acc)" }}>GROWTH</span>
+      </h1>
+      <p ref={taglineRef} className="mt-8 opacity-0" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 300, fontSize: "clamp(1.1rem, 2vw, 1.8rem)", color: "var(--fg)", letterSpacing: "-0.01em", lineHeight: 1.3, maxWidth: "720px" }}>
+        One specialist bridging{" "}
+        <strong style={{ color: "var(--acc)", fontWeight: 400 }}>UX, product strategy</strong>{" "}
+        and sales.
+      </p>
+      <div ref={barRef} className="mt-10 opacity-0 grid gap-8 items-center pt-8" style={{ borderTop: "1px solid var(--line)", gridTemplateColumns: "1fr auto" }}>
+        <div className="flex gap-12 flex-wrap">
+          {[{ label: "Availability", value: "Open to work" }, { label: "Location", value: "Remote worldwide" }, { label: "Focus", value: "SaaS · eCommerce · B2B" }].map((item) => (
+            <div key={item.label}>
+              <span className="block mb-1" style={{ fontSize: "0.65rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--dim)" }}>{item.label}</span>
+              <span style={{ fontSize: "0.95rem", color: "var(--fg)" }}>{item.value}</span>
             </div>
           ))}
-        </h1>
-
-        <div className="hero-sub mt-8" style={{ maxWidth: 560 }}>
-          <p style={{ fontFamily: "var(--font-unbounded)", fontWeight: 600, fontSize: "clamp(0.85rem, 1.5vw, 1.2rem)", color: "#eef1e6", letterSpacing: "-0.01em", lineHeight: 1.45, marginBottom: "0.6rem" }}>
-            I fix how products sell —<br />from first click to closed deal.
-          </p>
-          <p style={{ fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.82rem, 0.95vw, 0.95rem)", color: "rgba(238,241,230,0.4)", lineHeight: 1.65 }}>
-            Bridging UX, product strategy and revenue systems.
-          </p>
         </div>
-      </div>
-
-      {/* RIGHT: CTA buttons */}
-      <div className="relative z-10 flex flex-col gap-4 items-end self-end pb-4">
-        <a href="#contact" className="hero-btn"
-          style={{ fontFamily: "var(--font-unbounded)", fontWeight: 700, fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "1rem 2.2rem", background: "#c8f542", color: "#080807", borderRadius: 100, textDecoration: "none", whiteSpace: "nowrap" }}>
-          Start a project
-        </a>
-        <a href="#services" className="hero-btn"
-          style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400, fontSize: "0.62rem", letterSpacing: "0.12em", textTransform: "uppercase", padding: "1rem 2.2rem", background: "transparent", color: "#eef1e6", border: "1px solid rgba(238,241,230,0.15)", borderRadius: 100, textDecoration: "none", whiteSpace: "nowrap" }}>
-          Services
-        </a>
-      </div>
-
-      {/* Scroll hint */}
-      <div className="absolute bottom-8 left-16 flex flex-col items-center gap-2"
-        style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.42rem", letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(238,241,230,0.15)" }}>
-        <span>Scroll</span>
-        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(200,245,66,0.3), transparent)" }} />
+        <div className="flex gap-4 items-center flex-shrink-0">
+          <a href="#contact" style={btnMain}>Start a project</a>
+          <a href="#services" style={btnSec}>Services</a>
+        </div>
       </div>
     </section>
   );
