@@ -21,6 +21,11 @@ type Shape = {
   y: string;
 };
 
+type MatterBody = {
+  position: { x: number; y: number };
+  angle: number;
+};
+
 const SHAPES: Shape[] = [
   { type: "circle",   size: 52, color: "#c8f542", filled: true,  x: "12%", y: "-8%" },
   { type: "rect",     size: 44, color: "#c8f542", filled: false, x: "22%", y: "-5%" },
@@ -53,8 +58,8 @@ function PhysicsCanvas({ containerRef }: { containerRef: React.RefObject<HTMLEle
     let animFrame: number;
     let cleanupFn: (() => void) | null = null;
 
-    import("matter-js").then((M) => {
-      const { Engine, Runner, Bodies, Body, World, Mouse, MouseConstraint } = M;
+    import("matter-js").then((Matter) => {
+      const { Engine, Runner, Bodies, Body, World, Mouse, MouseConstraint } = Matter;
       const engine = Engine.create({ gravity: { x: 0, y: 1.4 } });
       const runner = Runner.create();
 
@@ -71,13 +76,15 @@ function PhysicsCanvas({ containerRef }: { containerRef: React.RefObject<HTMLEle
       });
       World.add(engine.world, cursorBody);
 
-      const bodies: { body: M.Body; shape: Shape }[] = [];
+      const bodies: { body: MatterBody; shape: Shape }[] = [];
+
       SHAPES.forEach((shape) => {
         const px = (parseFloat(shape.x) / 100) * W;
         const py = (parseFloat(shape.y) / 100) * H;
         const s = shape.size;
         const opts = { restitution: 0.55, friction: 0.1, density: 0.002 };
-        let body: M.Body;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let body: any;
 
         if (shape.type === "circle") {
           body = Bodies.circle(px, py, s / 2, opts);
@@ -87,7 +94,7 @@ function PhysicsCanvas({ containerRef }: { containerRef: React.RefObject<HTMLEle
             { x: 0, y: -h * 0.667 },
             { x: s / 2, y: h * 0.333 },
             { x: -s / 2, y: h * 0.333 },
-          ] as M.Vector[], { ...opts, restitution: 0.45 });
+          ], { ...opts, restitution: 0.45 });
         } else if (shape.type === "pill") {
           body = Bodies.rectangle(px, py, s * 1.8, s, { ...opts, chamfer: { radius: s / 2 } });
         } else {
@@ -116,7 +123,7 @@ function PhysicsCanvas({ containerRef }: { containerRef: React.RefObject<HTMLEle
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < 100 && dist > 1) {
             const f = (1 - dist / 100) * 0.007;
-            Body.applyForce(body, body.position, {
+            Body.applyForce(body as Parameters<typeof Body.applyForce>[0], body.position, {
               x: (dx / dist) * f,
               y: (dy / dist) * f,
             });
@@ -125,7 +132,7 @@ function PhysicsCanvas({ containerRef }: { containerRef: React.RefObject<HTMLEle
       };
       window.addEventListener("mousemove", onMouseMove);
 
-      const draw = (shape: Shape, body: M.Body) => {
+      const draw = (shape: Shape, body: MatterBody) => {
         const { x, y } = body.position;
         const s = shape.size;
         ctx.save();
@@ -227,7 +234,6 @@ export default function Hero() {
       return () => window.removeEventListener("mousemove", onMove);
     }, sectionRef);
 
-    // Tubes — load via script tag (avoids Next.js webpack https:// error)
     let app: { dispose?: () => void } | null = null;
     const t = setTimeout(() => {
       const load = () => {
@@ -238,10 +244,7 @@ export default function Hero() {
           app = tubes1(canvasRef.current, {
             tubes: {
               colors: ["#c8f542", "#a3d900", "#e0ff60"],
-              lights: {
-                intensity: 180,
-                colors: ["#c8f542", "#7a9a05", "#d4ff50", "#4a7a00"],
-              },
+              lights: { intensity: 180, colors: ["#c8f542", "#7a9a05", "#d4ff50", "#4a7a00"] },
             },
           });
         }
@@ -252,8 +255,7 @@ export default function Hero() {
       } else {
         const script = document.createElement("script");
         script.id = "tubes-script";
-        script.src =
-          "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
+        script.src = "https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js";
         script.onload = load;
         document.head.appendChild(script);
       }
@@ -280,76 +282,48 @@ export default function Hero() {
         gap: "2rem",
       }}
     >
-      {/* Tubes canvas — z-index 0, pointer-events none */}
-      <canvas
-        ref={canvasRef}
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{ opacity: 0.7 }}
-      />
-
-      {/* Physics shapes — z-index 6, above tubes */}
+      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0" style={{ opacity: 0.7 }} />
       <PhysicsCanvas containerRef={sectionRef} />
 
-      {/* Rings */}
       {[900, 580, 310].map((s, i) => (
-        <div
-          key={s}
-          className="hero-ring pointer-events-none absolute"
-          style={{
-            width: s, height: s,
-            border: `1px solid rgba(200,245,66,${0.04 - i * 0.01})`,
-            borderRadius: "50%",
-            top: "48%", left: "62%",
-            transform: "translate(-50%,-50%)",
-          }}
-        />
+        <div key={s} className="hero-ring pointer-events-none absolute" style={{
+          width: s, height: s,
+          border: `1px solid rgba(200,245,66,${0.04 - i * 0.01})`,
+          borderRadius: "50%", top: "48%", left: "62%",
+          transform: "translate(-50%,-50%)",
+        }} />
       ))}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse 50% 38% at 65% 48%, rgba(200,245,66,0.055) 0%, transparent 60%)",
-        }}
-      />
+      <div className="pointer-events-none absolute inset-0" style={{
+        background: "radial-gradient(ellipse 50% 38% at 65% 48%, rgba(200,245,66,0.055) 0%, transparent 60%)",
+      }} />
 
-      {/* LEFT: headline */}
       <div className="relative z-10">
-        <h1
-          style={{
-            fontFamily: "var(--font-unbounded)",
-            fontWeight: 900,
-            fontSize: "clamp(4rem, 10vw, 10rem)",
-            lineHeight: 0.9,
-            letterSpacing: "-0.05em",
-          }}
-        >
+        <h1 style={{
+          fontFamily: "var(--font-unbounded)", fontWeight: 900,
+          fontSize: "clamp(4rem, 10vw, 10rem)", lineHeight: 0.9, letterSpacing: "-0.05em",
+        }}>
           {WORDS.map((word, wi) => (
             <div key={word} className="hero-line" style={{ display: "block", overflow: "hidden" }}>
               <span style={{ display: "inline-flex" }}>
                 {word.split("").map((ch, ci) => (
-                  <span
-                    key={ci}
-                    className="hl"
-                    style={{ display: "inline-block", willChange: "transform", cursor: "default", ...STYLES[wi] }}
-                  >
-                    {ch}
-                  </span>
+                  <span key={ci} className="hl" style={{
+                    display: "inline-block", willChange: "transform", cursor: "default", ...STYLES[wi],
+                  }}>{ch}</span>
                 ))}
               </span>
             </div>
           ))}
         </h1>
-
         <div className="hero-sub mt-8" style={{ maxWidth: 560 }}>
           <p style={{
             fontFamily: "var(--font-unbounded)", fontWeight: 600,
-            fontSize: "clamp(0.85rem, 1.5vw, 1.2rem)",
-            color: "#eef1e6", letterSpacing: "-0.01em", lineHeight: 1.45, marginBottom: "0.6rem",
+            fontSize: "clamp(0.85rem, 1.5vw, 1.2rem)", color: "#eef1e6",
+            letterSpacing: "-0.01em", lineHeight: 1.45, marginBottom: "0.6rem",
           }}>
             I fix how products sell —<br />from first click to closed deal.
           </p>
           <p style={{
-            fontFamily: "var(--font-dm-sans)",
-            fontSize: "clamp(0.82rem, 0.95vw, 0.95rem)",
+            fontFamily: "var(--font-dm-sans)", fontSize: "clamp(0.82rem, 0.95vw, 0.95rem)",
             color: "rgba(238,241,230,0.4)", lineHeight: 1.65,
           }}>
             Bridging UX, product strategy and revenue systems.
@@ -357,32 +331,25 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* RIGHT: CTA */}
       <div className="relative z-10 flex flex-col gap-4 items-end self-end pb-4">
         <a href="#contact" className="hero-btn" style={{
-          fontFamily: "var(--font-unbounded)", fontWeight: 700,
-          fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase",
-          padding: "1rem 2.2rem", background: "#c8f542", color: "#080807",
-          borderRadius: 100, textDecoration: "none", whiteSpace: "nowrap",
-        }}>
-          Start a project
-        </a>
+          fontFamily: "var(--font-unbounded)", fontWeight: 700, fontSize: "0.65rem",
+          letterSpacing: "0.12em", textTransform: "uppercase", padding: "1rem 2.2rem",
+          background: "#c8f542", color: "#080807", borderRadius: 100,
+          textDecoration: "none", whiteSpace: "nowrap",
+        }}>Start a project</a>
         <a href="#services" className="hero-btn" style={{
-          fontFamily: "var(--font-unbounded)", fontWeight: 400,
-          fontSize: "0.62rem", letterSpacing: "0.12em", textTransform: "uppercase",
-          padding: "1rem 2.2rem", background: "transparent", color: "#eef1e6",
+          fontFamily: "var(--font-unbounded)", fontWeight: 400, fontSize: "0.62rem",
+          letterSpacing: "0.12em", textTransform: "uppercase", padding: "1rem 2.2rem",
+          background: "transparent", color: "#eef1e6",
           border: "1px solid rgba(238,241,230,0.15)", borderRadius: 100,
           textDecoration: "none", whiteSpace: "nowrap",
-        }}>
-          Services
-        </a>
+        }}>Services</a>
       </div>
 
-      {/* Scroll hint */}
       <div className="absolute bottom-8 left-16 flex flex-col items-center gap-2" style={{
         fontFamily: "var(--font-unbounded)", fontSize: "0.42rem",
-        letterSpacing: "0.35em", textTransform: "uppercase",
-        color: "rgba(238,241,230,0.15)",
+        letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(238,241,230,0.15)",
       }}>
         <span>Scroll</span>
         <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(200,245,66,0.3), transparent)" }} />
