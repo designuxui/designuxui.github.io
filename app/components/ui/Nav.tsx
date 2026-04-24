@@ -19,19 +19,19 @@ function SlideLink({ href, label, onClick }: { href: string; label: string; onCl
         onMouseEnter={e => {
           const a = (e.currentTarget as HTMLElement).querySelector(".la") as HTMLElement;
           const b = (e.currentTarget as HTMLElement).querySelector(".lb") as HTMLElement;
-          gsap.to(a, { y: "-100%", duration: 0.35, ease: "power3.inOut" });
-          gsap.to(b, { y: "-100%", duration: 0.35, ease: "power3.inOut" });
+          gsap.to(a, { y: "-100%", duration: 0.35, ease: "power3.inOut", color: "var(--fg)" });
+          gsap.to(b, { y: "-100%", duration: 0.35, ease: "power3.inOut", color: "var(--fg)" });
         }}
         onMouseLeave={e => {
           const a = (e.currentTarget as HTMLElement).querySelector(".la") as HTMLElement;
           const b = (e.currentTarget as HTMLElement).querySelector(".lb") as HTMLElement;
-          gsap.to(a, { y: "0%", duration: 0.35, ease: "power3.inOut" });
-          gsap.to(b, { y: "0%", duration: 0.35, ease: "power3.inOut" });
+          gsap.to(a, { y: "0%", duration: 0.35, ease: "power3.inOut", color: "var(--fg)" });
+          gsap.to(b, { y: "0%", duration: 0.35, ease: "power3.inOut", color: "var(--fg)" });
         }}>
-        <span className="la" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--dim)", display: "block", willChange: "transform" }}>
+        <span className="la" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg)", display: "block", willChange: "transform" }}>
           {label}
         </span>
-        <span className="lb" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--acc)", display: "block", position: "absolute", top: "100%", left: 0, willChange: "transform" }}>
+        <span className="lb" style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg)", display: "block", position: "absolute", top: "100%", left: 0, willChange: "transform" }}>
           {label}
         </span>
       </Link>
@@ -46,15 +46,34 @@ export default function Nav() {
   const line2Ref = useRef<HTMLSpanElement>(null);
   const line3Ref = useRef<HTMLSpanElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [lightNav, setLightNav] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [lang, setLang] = useState<"EN" | "PL">("EN");
 
   useEffect(() => {
-    gsap.set(navRef.current, { opacity: 0, y: -20 });
-    gsap.to(navRef.current, { opacity: 1, y: 0, duration: 0.8, delay: 0.3, ease: "power3.out" });
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const nav = navRef.current;
+    gsap.set(nav, { opacity: 0, y: -20 });
+    gsap.to(nav, { opacity: 1, y: 0, duration: 0.8, delay: 0.3, ease: "power3.out" });
+
+    const getLightHero = () => {
+      const hero = document.getElementById("hero");
+      const heroBg = hero ? (hero.style.background || window.getComputedStyle(hero).background || "") : "";
+      return /#f5f0e8|rgb\(\s*245\s*,\s*240\s*,\s*232\s*\)|rgba\(\s*245\s*,\s*240\s*,\s*232\s*,\s*1\s*\)|f5|f9|f2/i.test(heroBg);
+    };
+
+    const updateLightTheme = () => {
+      const isTop = window.scrollY < 10;
+      setLightNav(getLightHero() && isTop);
+      setScrolled(window.scrollY > 50);
+    };
+
+    updateLightTheme();
+    const timeout = window.setTimeout(updateLightTheme, 120);
+    window.addEventListener("scroll", updateLightTheme);
+    return () => {
+      window.removeEventListener("scroll", updateLightTheme);
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   // Burger animation — GSAP
@@ -70,16 +89,16 @@ export default function Nav() {
       gsap.to(l1, { y: 9, rotate: 45, duration: 0.35, ease: "power3.inOut" });
       gsap.to(l2, { opacity: 0, scaleX: 0, duration: 0.2, ease: "power3.inOut" });
       gsap.to(l3, { y: -9, rotate: -45, duration: 0.35, ease: "power3.inOut" });
-      // Menu slide in
+      // Menu slide in from top, faster
       gsap.fromTo(menu,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }
+        { opacity: 0, y: -32 },
+        { opacity: 1, y: 0, duration: 0.28, ease: "power3.out" }
       );
-      // Links stagger
+      // Links stagger from top-down
       const links = menu.querySelectorAll(".mobile-link");
       gsap.fromTo(links,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.07, delay: 0.15, ease: "power3.out" }
+        { opacity: 0, y: -18 },
+        { opacity: 1, y: 0, duration: 0.32, stagger: 0.06, delay: 0.08, ease: "power3.out" }
       );
     } else {
       // X → Lines
@@ -94,17 +113,18 @@ export default function Nav() {
   return (
     <>
       <nav ref={navRef}
-        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-5"
+        className={`fixed left-0 right-0 z-50 flex justify-between items-center px-6 md:px-12 py-5${lightNav ? " nav--light" : ""}`}
         style={{
+          top: "12mm",
           backdropFilter: scrolled ? "blur(20px)" : "none",
-          background: scrolled ? "rgba(8,7,6,0.92)" : "transparent",
+          background: "transparent",
           borderBottom: scrolled ? "1px solid rgba(238,241,230,0.06)" : "1px solid transparent",
           transition: "background 0.4s, border-color 0.4s",
           opacity: 0,
         }}>
 
         {/* Logo */}
-        <div style={{ overflow: "hidden", height: "1.3em", position: "relative" }}>
+        <div style={{ overflow: "hidden", height: "1.3em", position: "relative", marginLeft: "10mm" }}>
           <Link href="/"
             style={{ textDecoration: "none", display: "block" }}
             onMouseEnter={e => {
@@ -122,8 +142,8 @@ export default function Nav() {
             <span className="logo-a" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--fg)", display: "block", willChange: "transform" }}>
               BRIDGE<span style={{ color: "var(--acc)" }}>.</span>
             </span>
-            <span className="logo-b" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--acc)", display: "block", position: "absolute", top: "100%", left: 0, willChange: "transform" }}>
-              BRIDGE<span style={{ color: "var(--fg)" }}>.</span>
+            <span className="logo-b" style={{ fontFamily: "var(--font-unbounded)", fontSize: "1rem", fontWeight: 900, letterSpacing: "0.18em", color: "var(--fg)", display: "block", position: "absolute", top: "100%", left: 0, willChange: "transform" }}>
+              BRIDGE<span style={{ color: "var(--acc)" }}>.</span>
             </span>
           </Link>
         </div>
@@ -139,10 +159,10 @@ export default function Nav() {
             <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--acc)", display: "inline-block", animation: "pulse 2.2s ease infinite" }} />
             Open to work
           </div>
-          <div style={{ display: "flex", border: "1px solid rgba(238,241,230,0.12)", borderRadius: 4, overflow: "hidden" }}>
+          <div style={{ display: "flex", gap: "0.75rem" }}>
             {(["EN", "PL"] as const).map(l => (
               <button key={l} onClick={() => setLang(l)}
-                style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.58rem", fontWeight: 400, letterSpacing: "0.1em", padding: "0.4rem 0.8rem", background: lang === l ? "var(--acc)" : "transparent", color: lang === l ? "var(--bg)" : "var(--dim)", border: "none", cursor: "pointer", transition: "all 0.18s" }}>
+                style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.58rem", fontWeight: 400, letterSpacing: "0.1em", background: "transparent", color: "var(--fg)", border: "none", padding: 0, cursor: "pointer", transition: "color 0.18s" }}>
                 {l}
               </button>
             ))}
@@ -182,7 +202,7 @@ export default function Nav() {
                 href={l.href}
                 onClick={closeMenu}
                 style={{ fontFamily: "var(--font-unbounded)", fontSize: "clamp(1.4rem, 8vw, 2rem)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--fg)", textDecoration: "none", display: "block" }}
-                onMouseEnter={e => gsap.to(e.currentTarget, { color: "var(--acc)", duration: 0.2 })}
+                onMouseEnter={e => gsap.to(e.currentTarget, { color: "var(--fg)", duration: 0.2 })}
                 onMouseLeave={e => gsap.to(e.currentTarget, { color: "var(--fg)", duration: 0.2 })}
               >
                 {l.label}
@@ -204,6 +224,16 @@ export default function Nav() {
 
       <style jsx global>{`
         @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.9);opacity:0.35} }
+        .nav--light .la {
+          color: #1a1a1a !important;
+        }
+        .nav--light .logo-a,
+        .nav--light .logo-b {
+          color: #1a1a1a !important;
+        }
+        .nav--light .logo-a span {
+          color: #1a1a1a !important;
+        }
       `}</style>
     </>
   );

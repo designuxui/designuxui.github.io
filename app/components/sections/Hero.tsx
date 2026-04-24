@@ -6,10 +6,10 @@ gsap.registerPlugin(ScrollTrigger);
 
 const WORDS = ["WHERE", "DESIGN", "MEETS", "GROWTH"];
 const STYLES: React.CSSProperties[] = [
-  { color: "#0a0a0a" },
-  { color: "transparent", WebkitTextStroke: "1.5px #0a0a0a" },
-  { color: "rgba(10,10,10,0.35)" },
-  { color: "#c8f542", WebkitTextStroke: "1.5px #5a7a00" },
+  { color: "#1a1a1a" },
+  { color: "transparent", WebkitTextStroke: "1.5px #1a1a1a" },
+  { color: "rgba(26,26,26,0.4)" },
+  { color: "#c8f542" },
 ];
 
 type FillStyle =
@@ -403,7 +403,6 @@ function PhysicsCanvas({
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const btnRef = useRef<HTMLAnchorElement>(null);
-  const bgLayer1Ref = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -440,16 +439,6 @@ export default function Hero() {
 
         const fx = (e.clientX / window.innerWidth - 0.5) * 32;
         const fy = (e.clientY / window.innerHeight - 0.5) * 28;
-        const layer = bgLayer1Ref.current;
-
-        if (layer) {
-          gsap.to(layer, {
-            x: fx,
-            y: fy,
-            duration: 1.1,
-            ease: "power3.out",
-          });
-        }
       };
       window.addEventListener("mousemove", onMove);
       return () => window.removeEventListener("mousemove", onMove);
@@ -463,7 +452,7 @@ export default function Hero() {
       id="hero"
       className="relative min-h-[100dvh] overflow-hidden"
       style={{
-        background: "#f0f9d4",
+        background: "#f5f0e8",
         display: "grid",
         gridTemplateColumns: "1fr auto",
         alignItems: "center",
@@ -473,9 +462,8 @@ export default function Hero() {
     >
       <PhysicsCanvas containerRef={sectionRef} btnRef={btnRef} />
 
-      <div ref={bgLayer1Ref} className="pointer-events-none absolute inset-0" style={{
-        background: "radial-gradient(ellipse 60% 50% at 60% 40%, rgba(180,230,60,0.35) 0%, transparent 60%)",
-        transform: "translate3d(0,0,0)",
+      <div className="pointer-events-none absolute inset-0" style={{
+        background: "radial-gradient(ellipse 40% 30% at 70% 50%, rgba(200,245,66,0.08) 0%, transparent 60%)",
       }} />
 
       <div className="relative z-10">
@@ -499,7 +487,7 @@ export default function Hero() {
         <div className="hero-sub mt-6" style={{ maxWidth: 680 }}>
           <p style={{
             fontFamily: "var(--font-unbounded)", fontWeight: 500,
-            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(10,10,10,0.55)",
+            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(26,26,26,0.6)",
             letterSpacing: "-0.01em", lineHeight: 1.55, marginBottom: "0.4rem",
             userSelect: "none", cursor: "default", caretColor: "transparent",
             outline: "none", border: "none",
@@ -508,7 +496,7 @@ export default function Hero() {
           </p>
           <p style={{
             fontFamily: "var(--font-unbounded)", fontWeight: 500,
-            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(10,10,10,0.55)",
+            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(26,26,26,0.6)",
             letterSpacing: "-0.01em", lineHeight: 1.55,
             userSelect: "none", cursor: "default", caretColor: "transparent",
             outline: "none", border: "none",
@@ -524,7 +512,7 @@ export default function Hero() {
           fontSize: "clamp(0.55rem,1.2vw,0.65rem)", letterSpacing: "0.12em",
           textTransform: "uppercase",
           padding: "clamp(0.7rem,1.5vw,1rem) clamp(1.2rem,2.5vw,2.2rem)",
-          background: "#0a0a0a", color: "#f0f9d4", borderRadius: 100,
+          background: "#1a1a1a", color: "#f5f0e8", borderRadius: 100,
           textDecoration: "none", whiteSpace: "nowrap",
         }}>Start a project</a>
         <a href="#services" className="hero-btn" style={{
@@ -540,10 +528,10 @@ export default function Hero() {
 
       <div className="absolute bottom-8 left-16 hidden md:flex flex-col items-center gap-2" style={{
         fontFamily: "var(--font-unbounded)", fontSize: "0.42rem",
-        letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(10,10,10,0.2)",
+        letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(26,26,26,0.25)",
       }}>
         <span>Scroll</span>
-        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(10,10,10,0.3), transparent)" }} />
+        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(26,26,26,0.3), transparent)" }} />
       </div>
     </section>
   );
