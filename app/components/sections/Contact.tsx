@@ -3,6 +3,7 @@
 import { FormEvent, useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,19 +62,13 @@ export default function Contact() {
     if (!el) return;
 
     const ctx = gsap.context(() => {
-      const nodes = el.querySelectorAll(".contact-reveal");
-      gsap.set(nodes, { y: 40, opacity: 0 });
-      gsap.to(nodes, {
-        y: 0,
-        opacity: 1,
+      batchReveal(el, {
+        selector: ".contact-reveal",
+        start: "top 80%",
+        distance: 40,
         duration: 0.85,
         stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: el,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
+        batchMax: 6,
       });
     }, el);
 

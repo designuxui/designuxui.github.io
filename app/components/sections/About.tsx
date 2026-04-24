@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
+import { batchReveal } from "../ui/ScrollBatch";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,36 +41,24 @@ export default function About() {
         },
       });
 
-      const statCells = root.querySelectorAll(".about-stat");
-      gsap.set(statCells, { opacity: 0, y: 24 });
-      gsap.to(statCells, {
-        opacity: 1,
-        y: 0,
-        duration: 0.55,
+      batchReveal(root, {
+        selector: ".about-stat",
+        trigger: root.querySelector(".about-stats-grid"),
+        start: "top 82%",
+        distance: 24,
+        duration: 0.65,
         stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: root.querySelector(".about-stats-grid"),
-          start: "top 82%",
-          toggleActions: "play none none reverse",
-        },
+        batchMax: 4,
       });
 
-      const h2 = root.querySelector(".about-heading");
-      if (h2) {
-        gsap.set(h2, { opacity: 0, y: 36 });
-        gsap.to(h2, {
-          opacity: 1,
-          y: 0,
-          duration: 0.75,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: root,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        });
-      }
+      batchReveal(root, {
+        selector: ".about-heading",
+        start: "top 85%",
+        distance: 36,
+        duration: 0.75,
+        stagger: 0.05,
+        batchMax: 1,
+      });
     }, root);
 
     return () => ctx.revert();

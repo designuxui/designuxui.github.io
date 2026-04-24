@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
 gsap.registerPlugin(ScrollTrigger);
 
 const items = ["UX Strategy","Product Strategy","Conversion Optimization","B2B Sales Systems","CRM Setup","Funnel Design","UX Audit","SaaS Growth"];
@@ -17,9 +18,16 @@ export default function Ticker() {
     const row2 = row2Ref.current;
     if (!wrap || !row1 || !row2) return;
 
-    gsap.set(wrap, { opacity: 0 });
-    gsap.to(wrap, { opacity: 1, duration: 1, ease: "power3.out",
-      scrollTrigger: { trigger: wrap, start: "top 95%", once: true } });
+    const ctx = gsap.context(() => {
+      batchReveal(wrap, {
+        selector: ".ticker-row",
+        start: "top 95%",
+        distance: 30,
+        duration: 1,
+        ease: "power3.out",
+        batchMax: 1,
+      });
+    }, wrap);
 
     // Row 1 goes right, Row 2 goes left — Effect 046 style
     const tween1 = gsap.to(row1, { xPercent: -50, ease: "none", duration: 22, repeat: -1 });
@@ -58,11 +66,11 @@ export default function Ticker() {
   return (
     <div ref={wrapRef} style={{ borderTop: "1px solid var(--line)", borderBottom: "1px solid var(--line)", background: "var(--bg)", overflow: "hidden", padding: "0.6rem 0" }}>
       {/* Row 1 — goes right */}
-      <div ref={row1Ref} className="flex w-max" style={{ marginBottom: "0.4rem" }}>
+      <div ref={row1Ref} className="ticker-row flex w-max" style={{ marginBottom: "0.4rem" }}>
         {renderItems(false)}
       </div>
       {/* Row 2 — goes left, slightly different style */}
-      <div ref={row2Ref} className="flex w-max" style={{ transform: "translateX(-50%)" }}>
+      <div ref={row2Ref} className="ticker-row flex w-max" style={{ transform: "translateX(-50%)" }}>
         {renderItems(true)}
       </div>
     </div>

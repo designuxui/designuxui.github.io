@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import type * as MatterTypes from "matter-js";
 
 type Shape = {
   type: "circle" | "rect" | "triangle" | "pill";
@@ -75,14 +76,14 @@ export default function PhysicsShapes({
       World.add(engine.world, cursorBody);
 
       // Build physics bodies
-      const bodies: { body: M.Body; shape: Shape }[] = [];
+      const bodies: { body: MatterTypes.Body; shape: Shape }[] = [];
 
       SHAPES.forEach((shape) => {
         const px = (parseFloat(shape.x) / 100) * W;
         const py = (parseFloat(shape.y) / 100) * H;
         const s = shape.size;
         const opts = { restitution: 0.55, friction: 0.1, density: 0.002 };
-        let body: M.Body;
+        let body: MatterTypes.Body;
 
         if (shape.type === "circle") {
           body = Bodies.circle(px, py, s / 2, opts);
@@ -93,9 +94,10 @@ export default function PhysicsShapes({
             { x:  s / 2,  y:  h * 0.333 },
             { x: -s / 2,  y:  h * 0.333 },
           ];
-          body = Bodies.fromVertices(px, py, verts as M.Vector[], {
+          const created = Bodies.fromVertices(px, py, [verts as MatterTypes.Vector[]], {
             ...opts, restitution: 0.45,
           });
+          body = Array.isArray(created) ? created[0] : created;
         } else if (shape.type === "pill") {
           body = Bodies.rectangle(px, py, s * 1.8, s, {
             ...opts, chamfer: { radius: s / 2 },
@@ -143,7 +145,7 @@ export default function PhysicsShapes({
       window.addEventListener("mousemove", onMouseMove);
 
       // Draw each shape on canvas
-      const draw = (shape: Shape, body: M.Body) => {
+      const draw = (shape: Shape, body: MatterTypes.Body) => {
         const { x, y } = body.position;
         const a = body.angle;
         const s = shape.size;

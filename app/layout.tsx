@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { DM_Sans, Unbounded } from "next/font/google";
+import type { CSSProperties } from "react";
 import "./globals.css";
 import MagneticCursor from "@/app/components/ui/MagneticCursor";
 import Nav from "@/app/components/ui/Nav";
 import SmoothScroll from "@/app/components/ui/SmoothScroll";
 import ColorTransitions from "@/app/components/ui/ColorTransitions";
+import PageTransition from "@/app/components/ui/PageTransition";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -34,7 +36,9 @@ export default function RootLayout({
         <MagneticCursor />
         <Nav />
         <ColorTransitions />
-        <SmoothScroll>{children}</SmoothScroll>
+        <PageTransition>
+          <SmoothScroll>{children}</SmoothScroll>
+        </PageTransition>
       </body>
     </html>
   );

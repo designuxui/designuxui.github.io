@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,20 +29,13 @@ export default function MarketplacePreview() {
     if (!root || !track) return;
 
     const ctx = gsap.context(() => {
-      const cards = track.querySelectorAll(".template-card");
-      
-      gsap.set(cards, { opacity: 0, y: 40 });
-      gsap.to(cards, {
-        opacity: 1,
-        y: 0,
+      batchReveal(root, {
+        selector: ".template-card",
+        start: "top 80%",
+        distance: 40,
         duration: 0.8,
         stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: root,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
+        batchMax: 8,
       });
 
       gsap.to(track, {

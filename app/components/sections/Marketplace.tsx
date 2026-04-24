@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,23 +24,14 @@ export default function Marketplace() {
     if (!root) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".market-card",
-        { y: 72, opacity: 0, rotateX: -8 },
-        {
-          y: 0,
-          opacity: 1,
-          rotateX: 0,
-          duration: 0.85,
-          stagger: 0.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: root,
-            start: "top 82%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
+      batchReveal(root, {
+        selector: ".market-card",
+        start: "top 82%",
+        distance: 72,
+        duration: 0.85,
+        stagger: 0.1,
+        batchMax: 6,
+      });
     }, root);
 
     return () => ctx.revert();

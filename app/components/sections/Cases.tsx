@@ -3,6 +3,9 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
+import ProximityCard from "../ui/ProximityCard";
+import AnimatedText from "../ui/AnimatedText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,6 +29,15 @@ export default function Cases() {
     const cards = gsap.utils.toArray<HTMLElement>(".case-card");
 
     const ctx = gsap.context(() => {
+      batchReveal(section, {
+        selector: ".case-card",
+        start: "top 85%",
+        distance: 40,
+        duration: 0.8,
+        stagger: 0.08,
+        batchMax: 5,
+      });
+
       const scrollAmount = () => Math.max(track.scrollWidth - window.innerWidth + 128, 1);
 
       const tween = gsap.to(track, {
@@ -75,23 +87,35 @@ export default function Cases() {
           <p className="mb-4 text-[0.72rem] font-bold uppercase tracking-[0.22em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}>
             Selected work
           </p>
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-black uppercase leading-tight tracking-[-0.03em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--fg)" }}>
-            Case studies
-          </h2>
+          <AnimatedText
+            text="Case studies"
+            split="words"
+            delay={0.1}
+            style={{
+              fontFamily: "var(--font-unbounded)",
+              fontSize: "clamp(2rem,4vw,3rem)",
+              fontWeight: 900,
+              lineHeight: "tight",
+              letterSpacing: "-0.03em",
+              textTransform: "uppercase",
+              color: "var(--fg)",
+            }}
+          />
         </header>
         <div className="min-h-0 flex-1 overflow-hidden" style={{ perspective: "1200px" }}>
           <div ref={trackRef} className="flex h-full items-stretch gap-10 pr-16 will-change-transform">
             {CASES.map((c) => (
-              <article
+              <ProximityCard
                 key={c.name}
-                className="case-card flex shrink-0 flex-col justify-between border p-10"
+                glowColor="rgba(200,245,66,0.2)"
+                className="case-card flex shrink-0 flex-col justify-between border"
                 style={{
                   width: "min(78vw, 440px)",
                   borderColor: "var(--line)",
                   background: "var(--card)",
                   borderRadius: "4px",
+                  padding: "2.5rem",
                   transformStyle: "preserve-3d",
-                  willChange: "transform",
                 }}
               >
                 <div>
@@ -108,7 +132,7 @@ export default function Cases() {
                 <span className="mt-10 text-[0.62rem] uppercase tracking-[0.14em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}>
                   Scroll →
                 </span>
-              </article>
+              </ProximityCard>
             ))}
           </div>
         </div>

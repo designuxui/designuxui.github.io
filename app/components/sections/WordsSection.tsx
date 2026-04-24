@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,23 +25,14 @@ export default function WordsSection() {
       const words = wordsRef.current?.querySelectorAll(".word-item");
       if (!words?.length) return;
 
-      gsap.set(words, {
-        x: (i) => 100 + i * 30,
-        opacity: 0,
-      });
-
-      gsap.to(words, {
-        x: 0,
-        opacity: 1,
+      batchReveal(sectionRef.current, {
+        selector: ".word-item",
+        start: "top 80%",
+        distance: 80,
         duration: 1.2,
         ease: "power3.out",
         stagger: 0.15,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          scrub: 1,
-        },
+        batchMax: 8,
       });
     }, sectionRef);
 

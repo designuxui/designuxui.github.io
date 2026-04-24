@@ -2,6 +2,8 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { batchReveal } from "../ui/ScrollBatch";
+import AnimatedText from "../ui/AnimatedText";
 gsap.registerPlugin(ScrollTrigger);
 
 const SERVICES = [
@@ -33,13 +35,15 @@ const SERVICES = [
 
 export default function Services() {
   useEffect(() => {
-    SERVICES.forEach((s, i) => {
-      const panel = document.querySelector(`.service-panel-${i}`);
-      if (!panel) return;
-      gsap.from(`.service-panel-${i} .sv-content`, {
-        opacity: 0, y: 40, duration: 0.8, ease: "power3.out",
-        scrollTrigger: { trigger: panel, start: "top 60%", once: true },
-      });
+    const root = document.querySelector("#services");
+    if (!root) return;
+    batchReveal(root as HTMLElement, {
+      selector: ".service-panel",
+      start: "top 60%",
+      distance: 40,
+      duration: 0.85,
+      stagger: 0.12,
+      batchMax: 4,
     });
   }, []);
 
@@ -47,7 +51,7 @@ export default function Services() {
     <section id="services" className="relative">
       {SERVICES.map((s, i) => (
         <article key={s.num}
-          className={`service-panel-${i} sticky top-0 flex min-h-[100dvh] flex-col justify-center overflow-hidden`}
+          className={`service-panel service-panel-${i} sticky top-0 flex min-h-[100dvh] flex-col justify-center overflow-hidden`}
           style={{
             zIndex: i + 1,
             background: s.dark ? "#080807" : "#f2efe8",
@@ -65,9 +69,20 @@ export default function Services() {
             <p style={{ fontFamily: "var(--font-unbounded)", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: s.dark ? "#c8f542" : "#3d6a00", marginBottom: "1rem" }}>
               {s.num} — Services
             </p>
-            <h2 style={{ fontFamily: "var(--font-unbounded)", fontWeight: 900, fontSize: "clamp(2rem, 4.5vw, 3.8rem)", letterSpacing: "-0.04em", lineHeight: 0.95, color: s.dark ? "#eef1e6" : "#0a0a0a", marginBottom: "1.5rem" }}>
-              {s.title}
-            </h2>
+            <AnimatedText
+              text={s.title}
+              split="words"
+              delay={0.1}
+              style={{
+                fontFamily: "var(--font-unbounded)",
+                fontWeight: 900,
+                fontSize: "clamp(2rem, 4.5vw, 3.8rem)",
+                letterSpacing: "-0.04em",
+                lineHeight: 0.95,
+                color: s.dark ? "#eef1e6" : "#0a0a0a",
+                marginBottom: "1.5rem",
+              }}
+            />
             <p style={{ fontSize: "1.15rem", fontWeight: 600, color: s.dark ? "#c8f542" : "#3d6a00", fontStyle: "italic", marginBottom: "1.2rem", lineHeight: 1.45 }}>
               {s.hook}
             </p>
