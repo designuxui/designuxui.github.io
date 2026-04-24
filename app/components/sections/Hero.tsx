@@ -6,10 +6,10 @@ gsap.registerPlugin(ScrollTrigger);
 
 const WORDS = ["WHERE", "DESIGN", "MEETS", "GROWTH"];
 const STYLES: React.CSSProperties[] = [
-  { color: "#eef1e6" },
-  { color: "transparent", WebkitTextStroke: "1.5px #eef1e6" },
-  { color: "rgba(238,241,230,0.5)" },
-  { color: "#c8f542" },
+  { color: "#0a0a0a" },
+  { color: "transparent", WebkitTextStroke: "1.5px #0a0a0a" },
+  { color: "rgba(10,10,10,0.35)" },
+  { color: "#c8f542", WebkitTextStroke: "1.5px #5a7a00" },
 ];
 
 type FillStyle =
@@ -29,10 +29,10 @@ type ShapeDef = {
 
 const SHAPES: ShapeDef[] = [
   { type: "circle",     size: 56, fill: { kind: "solid",   color: "#c8f542" },             x: "15%", y: "5%", density: 0.006, restitution: 0.25 },
-  { type: "triangle",   size: 50, fill: { kind: "outline", color: "#ffffff", width: 1.5 }, x: "38%", y: "8%",  density: 0.001, restitution: 0.82 },
-  { type: "rect",       size: 44, fill: { kind: "solid",   color: "#ff6b2b" },             x: "62%", y: "4%", density: 0.005, restitution: 0.28 },
-  { type: "diamond",    size: 52, fill: { kind: "glow",    color: "#8b5cf6" },             x: "80%", y: "6%",  density: 0.002, restitution: 0.6  },
-  { type: "halfcircle", size: 48, fill: { kind: "outline", color: "#ffd426", width: 1.5 }, x: "50%", y: "3%", density: 0.001, restitution: 0.75 },
+  { type: "triangle",   size: 50, fill: { kind: "outline", color: "#ffffff", width: 1.5 }, x: "38%", y: "3%",  density: 0.001, restitution: 0.82 },
+  { type: "rect",       size: 44, fill: { kind: "solid",   color: "#ff6b2b" },             x: "62%", y: "6%", density: 0.005, restitution: 0.28 },
+  { type: "diamond",    size: 52, fill: { kind: "glow",    color: "#8b5cf6" },             x: "80%", y: "4%",  density: 0.002, restitution: 0.6  },
+  { type: "halfcircle", size: 48, fill: { kind: "outline", color: "#ffd426", width: 1.5 }, x: "50%", y: "2%", density: 0.001, restitution: 0.75 },
 ];
 
 const EXTRA: ShapeDef[] = [
@@ -94,13 +94,13 @@ function drawShape(
     ctx.stroke(path);
   } else {
     // glow: два слоя
-    ctx.globalAlpha *= 0.45;
+    ctx.globalAlpha *= 0.55;
     ctx.fillStyle = f.color;
     ctx.shadowColor = f.color;
     ctx.shadowBlur = 24;
     ctx.fill(path);
     ctx.shadowBlur = 0;
-    ctx.globalAlpha = alpha * 0.95;
+    ctx.globalAlpha = alpha * 0.98;
     ctx.fillStyle = f.color;
     ctx.fill(path);
   }
@@ -463,7 +463,7 @@ export default function Hero() {
       id="hero"
       className="relative min-h-[100dvh] overflow-hidden"
       style={{
-        background: "#080808",
+        background: "#f0f9d4",
         display: "grid",
         gridTemplateColumns: "1fr auto",
         alignItems: "center",
@@ -474,11 +474,8 @@ export default function Hero() {
       <PhysicsCanvas containerRef={sectionRef} btnRef={btnRef} />
 
       <div ref={bgLayer1Ref} className="pointer-events-none absolute inset-0" style={{
-        background: "radial-gradient(ellipse 50% 38% at 65% 48%, rgba(200,245,66,0.04) 0%, transparent 60%)",
+        background: "radial-gradient(ellipse 60% 50% at 60% 40%, rgba(180,230,60,0.35) 0%, transparent 60%)",
         transform: "translate3d(0,0,0)",
-      }} />
-      <div className="pointer-events-none absolute inset-0" style={{
-        background: "radial-gradient(ellipse 50% 38% at 65% 48%, rgba(200,245,66,0.08) 0%, transparent 60%)",
       }} />
 
       <div className="relative z-10">
@@ -502,21 +499,21 @@ export default function Hero() {
         <div className="hero-sub mt-6" style={{ maxWidth: 680 }}>
           <p style={{
             fontFamily: "var(--font-unbounded)", fontWeight: 500,
-            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(238,241,230,0.55)",
+            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(10,10,10,0.55)",
             letterSpacing: "-0.01em", lineHeight: 1.55, marginBottom: "0.4rem",
             userSelect: "none", cursor: "default", caretColor: "transparent",
             outline: "none", border: "none",
           }}>
-            I fix how products sell — from first click to closed deal
+            I bridge UX gaps that cost you revenue
           </p>
           <p style={{
             fontFamily: "var(--font-unbounded)", fontWeight: 500,
-            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(238,241,230,0.55)",
+            fontSize: "clamp(0.65rem,1.1vw,1rem)", color: "rgba(10,10,10,0.55)",
             letterSpacing: "-0.01em", lineHeight: 1.55,
             userSelect: "none", cursor: "default", caretColor: "transparent",
             outline: "none", border: "none",
           }}>
-            Bridging UX, product strategy and revenue systems
+            Strategy · Product · Sales — one person, zero agency overhead
           </p>
         </div>
       </div>
@@ -527,7 +524,7 @@ export default function Hero() {
           fontSize: "clamp(0.55rem,1.2vw,0.65rem)", letterSpacing: "0.12em",
           textTransform: "uppercase",
           padding: "clamp(0.7rem,1.5vw,1rem) clamp(1.2rem,2.5vw,2.2rem)",
-          background: "#c8f542", color: "#080807", borderRadius: 100,
+          background: "#0a0a0a", color: "#f0f9d4", borderRadius: 100,
           textDecoration: "none", whiteSpace: "nowrap",
         }}>Start a project</a>
         <a href="#services" className="hero-btn" style={{
@@ -535,18 +532,18 @@ export default function Hero() {
           fontSize: "clamp(0.52rem,1.1vw,0.62rem)", letterSpacing: "0.12em",
           textTransform: "uppercase",
           padding: "clamp(0.7rem,1.5vw,1rem) clamp(1.2rem,2.5vw,2.2rem)",
-          background: "transparent", color: "#eef1e6",
-          border: "1px solid rgba(238,241,230,0.15)", borderRadius: 100,
+          background: "transparent", color: "#0a0a0a",
+          border: "1px solid rgba(10,10,10,0.2)", borderRadius: 100,
           textDecoration: "none", whiteSpace: "nowrap",
         }}>Services</a>
       </div>
 
       <div className="absolute bottom-8 left-16 hidden md:flex flex-col items-center gap-2" style={{
         fontFamily: "var(--font-unbounded)", fontSize: "0.42rem",
-        letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(238,241,230,0.15)",
+        letterSpacing: "0.35em", textTransform: "uppercase", color: "rgba(10,10,10,0.2)",
       }}>
         <span>Scroll</span>
-        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(200,245,66,0.4), transparent)" }} />
+        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(10,10,10,0.3), transparent)" }} />
       </div>
     </section>
   );
