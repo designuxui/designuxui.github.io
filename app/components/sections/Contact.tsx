@@ -138,7 +138,7 @@ export default function Contact() {
           Start a project
         </h2>
         <p className="contact-reveal" style={{ fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(10, 10, 10, 0.55)", marginBottom: "2.5rem" }}>
-          Placeholder form—wire this to your API or form provider when ready.
+          Tell me about your project — I'll get back within 24 hours.
         </p>
         <form className="contact-reveal" onSubmit={handleSubmit}>
           <div style={{ marginBottom: "1.25rem" }}>

@@ -10,7 +10,7 @@ const STATS = [
   { value: "25–40%", from: 25, to: 40, format: (n: number) => `${Math.round(n)}%`,   label: "Conversion improvement", sub: "UX & funnel fixes" },
   { value: "+20%",   from: 0,  to: 20, format: (n: number) => `+${Math.round(n)}%`,  label: "Faster deal cycles",     sub: "B2B sales optimization" },
   { value: "50+",    from: 0,  to: 50, format: (n: number) => `${Math.round(n)}+`,   label: "Projects delivered",     sub: "B2B & B2C" },
-  { value: "5+",     from: 0,  to: 5,  format: (n: number) => `${Math.round(n)}+`,   label: "Years experience",       sub: "Sales, UX & product" },
+  { value: "8+",     from: 0,  to: 8,  format: (n: number) => `${Math.round(n)}+`,   label: "Years experience",       sub: "Sales, UX & product" },
   { value: "3×",     from: 0,  to: 3,  format: (n: number) => `${Math.round(n)}×`,   label: "Disciplines",            sub: "UX + Product + Growth" },
 ];
 
