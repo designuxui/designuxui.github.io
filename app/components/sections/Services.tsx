@@ -7,35 +7,31 @@ gsap.registerPlugin(ScrollTrigger);
 const SERVICES = [
   {
     num: "01",
-    title: "UX Audit & Conversion",
-    tagline: "I audit flows and redesign them to increase conversion — not just visuals.",
-    description: "Landing pages, checkout, onboarding — wherever your business is losing revenue. I identify friction points, redesign the flow, and measure the result.",
-    tags: ["Strategy", "Research", "Figma"],
-    keywords: ["UX Audit", "Funnel Analysis", "Landing Pages"],
+    title: "UX & Conversion",
+    sub: "We find your friction points. Then redesign the flow to convert.",
+    keywords: ["Strategy", "Narrative", "Direction"],
+    description: "Landing pages, checkout, onboarding — wherever your business is losing revenue. We identify friction, redesign the flow, and measure the result.",
   },
   {
     num: "02",
-    title: "Product & Funnel Strategy",
-    tagline: "I help teams prioritise features that drive revenue, not vanity metrics.",
-    description: "Roadmap decisions backed by funnel data. Growth frameworks that connect product actions to revenue outcomes.",
-    tags: ["Roadmap", "Metrics", "Growth"],
-    keywords: ["Product Strategy", "OKRs", "Prioritisation"],
+    title: "Product & Funnel",
+    sub: "We tell stories with data that connect and perform commercially.",
+    keywords: ["Concept", "Roadmap", "Storytelling"],
+    description: "Roadmap decisions backed by funnel data. Growth frameworks that connect product actions to revenue outcomes. Prioritisation that actually ships.",
   },
   {
     num: "03",
-    title: "B2B Sales & CRM Systems",
-    tagline: "From pipeline setup to closing strategy.",
-    description: "CRM setup, pipeline structure, deal flow — I rebuild how your sales process actually works. Whether outbound or inbound.",
-    tags: ["Pipeline", "CRM", "Outbound"],
-    keywords: ["Salesforce", "HubSpot", "Deal Flow"],
+    title: "B2B Sales Systems",
+    sub: "We turn spaces — pipelines, CRMs — into experiences you can feel.",
+    keywords: ["Pipeline", "CRM", "Outbound"],
+    description: "CRM setup, deal flow structure, outbound sequences. We rebuild how your sales process actually works — whether inbound or outbound.",
   },
   {
     num: "04",
     title: "Growth & Partnership",
-    tagline: "Creativity connected to operations so ideas ship.",
-    description: "I connect your creative direction with revenue systems — so launches convert, partnerships compound, and nothing dies in a deck.",
-    tags: ["PR", "Process", "Launch"],
-    keywords: ["GTM", "Partnerships", "Launch Strategy"],
+    sub: "We connect creativity with operations so ideas ship and don't die in a deck.",
+    keywords: ["PR", "Process", "Launch"],
+    description: "GTM strategy, partnership frameworks, launch systems. We make sure your creative ambition is backed by the operational structure to execute.",
   },
 ];
 
@@ -45,15 +41,13 @@ export default function Services() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(".sv-row", {
-        opacity: 0, y: 30,
-      }, {
-        opacity: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.08,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-        },
-      });
+      gsap.fromTo(".sv-item",
+        { opacity: 0, y: 24 },
+        {
+          opacity: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.1,
+          scrollTrigger: { trigger: sectionRef.current, start: "top 72%" },
+        }
+      );
     }, sectionRef);
     return () => ctx.revert();
   }, []);
@@ -65,69 +59,64 @@ export default function Services() {
       style={{
         background: "#0a0a0a",
         color: "#eef1e6",
-        padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,4vw,4rem)",
-        borderTop: "1px solid rgba(238,241,230,0.06)",
+        padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,5vw,5rem)",
+        borderTop: "1px solid rgba(238,241,230,0.05)",
       }}
     >
-      {/* Header */}
-      <div style={{
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        marginBottom: "4rem",
-        borderBottom: "1px solid rgba(238,241,230,0.08)",
-        paddingBottom: "2rem",
-      }}>
+      {/* Header — like Ashley's "We Do / Campaigns. Branding. Film." */}
+      <div style={{ marginBottom: "3rem", borderBottom: "1px solid rgba(238,241,230,0.07)", paddingBottom: "2.5rem" }}>
         <p style={{
           fontFamily: "var(--font-unbounded)",
-          fontSize: "0.68rem",
+          fontSize: "0.65rem",
           fontWeight: 700,
           letterSpacing: "0.22em",
           textTransform: "uppercase",
           color: "#c8f542",
+          marginBottom: "1rem",
         }}>
-          Services
+          We do
         </p>
-        <p style={{
+        <h2 style={{
           fontFamily: "var(--font-unbounded)",
-          fontSize: "0.6rem",
-          letterSpacing: "0.1em",
-          color: "rgba(238,241,230,0.3)",
-          textTransform: "uppercase",
+          fontWeight: 900,
+          fontSize: "clamp(2rem,5vw,4.5rem)",
+          lineHeight: 1,
+          letterSpacing: "-0.04em",
+          color: "#eef1e6",
+          margin: 0,
         }}>
-          What we do
-        </p>
+          UX. Product. Sales.<br />
+          <span style={{ color: "rgba(238,241,230,0.3)" }}>And everything it takes to make them grow.</span>
+        </h2>
       </div>
 
-      {/* Service rows — hover expand like Ashley */}
+      {/* Service rows */}
       <div>
         {SERVICES.map((sv, i) => (
           <div
             key={sv.num}
-            className="sv-row"
+            className="sv-item"
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
             style={{
               borderBottom: "1px solid rgba(238,241,230,0.07)",
-              cursor: "default",
               transition: "background 0.3s",
-              background: hovered === i ? "rgba(238,241,230,0.03)" : "transparent",
-              borderRadius: "4px",
+              background: hovered === i ? "rgba(238,241,230,0.02)" : "transparent",
             }}
           >
-            {/* Row header */}
+            {/* Row main */}
             <div style={{
               display: "grid",
-              gridTemplateColumns: "80px 1fr auto",
+              gridTemplateColumns: "5rem 1fr auto",
               alignItems: "center",
               gap: "2rem",
-              padding: "1.75rem 1rem",
+              padding: "1.6rem 1rem",
             }}>
               <span style={{
                 fontFamily: "var(--font-unbounded)",
                 fontSize: "0.6rem",
                 letterSpacing: "0.15em",
-                color: hovered === i ? "#c8f542" : "rgba(238,241,230,0.25)",
+                color: hovered === i ? "#c8f542" : "rgba(238,241,230,0.2)",
                 transition: "color 0.3s",
               }}>
                 {sv.num}
@@ -137,41 +126,43 @@ export default function Services() {
                 <h3 style={{
                   fontFamily: "var(--font-unbounded)",
                   fontWeight: 900,
-                  fontSize: "clamp(1.4rem,3vw,2.4rem)",
+                  fontSize: "clamp(1.5rem,3.2vw,2.8rem)",
                   letterSpacing: "-0.03em",
                   lineHeight: 1,
-                  color: hovered === i ? "#eef1e6" : "rgba(238,241,230,0.75)",
+                  color: hovered === i ? "#eef1e6" : "rgba(238,241,230,0.7)",
                   transition: "color 0.3s",
                   margin: 0,
                 }}>
                   {sv.title}
                 </h3>
-                {/* Tagline — shows on hover */}
+                {/* Sub-tagline on hover */}
                 <div style={{
                   overflow: "hidden",
-                  maxHeight: hovered === i ? "60px" : "0px",
+                  maxHeight: hovered === i ? "3rem" : "0",
                   opacity: hovered === i ? 1 : 0,
-                  transition: "max-height 0.35s ease, opacity 0.3s ease",
-                  marginTop: hovered === i ? "0.5rem" : 0,
+                  transition: "max-height 0.35s ease, opacity 0.3s",
+                  marginTop: hovered === i ? "0.4rem" : 0,
                 }}>
                   <p style={{
                     fontFamily: "var(--font-unbounded)",
-                    fontSize: "0.75rem",
+                    fontSize: "0.72rem",
                     fontStyle: "italic",
                     color: "#c8f542",
                     lineHeight: 1.5,
                   }}>
-                    {sv.tagline}
+                    {sv.sub}
                   </p>
                 </div>
               </div>
 
-              {/* Keywords — show on hover */}
+              {/* Keywords — like Ashley's "Strategy / Narrative / Direction" */}
               <div style={{
                 display: "flex",
-                gap: "0.5rem",
+                flexDirection: "column",
+                gap: "0.2rem",
+                alignItems: "flex-end",
                 opacity: hovered === i ? 1 : 0,
-                transform: hovered === i ? "translateX(0)" : "translateX(10px)",
+                transform: hovered === i ? "translateX(0)" : "translateX(12px)",
                 transition: "opacity 0.3s, transform 0.3s",
               }}>
                 {sv.keywords.map((k) => (
@@ -180,10 +171,7 @@ export default function Services() {
                     fontSize: "0.55rem",
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    padding: "0.3rem 0.8rem",
-                    border: "1px solid rgba(200,245,66,0.25)",
-                    borderRadius: "2px",
-                    color: "rgba(200,245,66,0.7)",
+                    color: "rgba(200,245,66,0.6)",
                     whiteSpace: "nowrap",
                   }}>
                     {k}
@@ -195,63 +183,39 @@ export default function Services() {
             {/* Expanded description */}
             <div style={{
               overflow: "hidden",
-              maxHeight: hovered === i ? "200px" : "0px",
+              maxHeight: hovered === i ? "120px" : "0",
               opacity: hovered === i ? 1 : 0,
-              transition: "max-height 0.4s ease, opacity 0.3s ease",
+              transition: "max-height 0.4s ease, opacity 0.3s",
             }}>
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "80px 1fr auto",
+                gridTemplateColumns: "5rem 1fr",
                 gap: "2rem",
-                padding: "0 1rem 1.75rem",
+                padding: "0 1rem 1.6rem",
               }}>
                 <div />
                 <p style={{
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "1rem",
-                  color: "rgba(238,241,230,0.55)",
+                  fontFamily: "var(--font-unbounded)",
+                  fontSize: "0.78rem",
+                  color: "rgba(238,241,230,0.45)",
                   lineHeight: 1.75,
-                  maxWidth: "40rem",
+                  maxWidth: "38rem",
+                  letterSpacing: "-0.01em",
                 }}>
                   {sv.description}
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", alignItems: "flex-end" }}>
-                  {sv.tags.map((t) => (
-                    <span key={t} style={{
-                      fontFamily: "var(--font-unbounded)",
-                      fontSize: "0.55rem",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "rgba(238,241,230,0.3)",
-                    }}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Bottom CTA */}
-      <div style={{ marginTop: "4rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <p style={{
-          fontFamily: "var(--font-unbounded)",
-          fontSize: "clamp(0.9rem,2vw,1.4rem)",
-          fontWeight: 700,
-          color: "rgba(238,241,230,0.5)",
-          letterSpacing: "-0.02em",
-          maxWidth: "32rem",
-          lineHeight: 1.4,
-        }}>
-          Vision is nothing without execution.<br />
-          <span style={{ color: "#eef1e6" }}>We build both.</span>
-        </p>
+      {/* Bottom CTA link — like Ashley's "Our Services" */}
+      <div style={{ marginTop: "3rem", display: "flex", justifyContent: "flex-end" }}>
         <a href="#contact" style={{
           fontFamily: "var(--font-unbounded)",
           fontWeight: 700,
-          fontSize: "0.62rem",
+          fontSize: "0.65rem",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           padding: "0.9rem 2rem",
@@ -262,9 +226,8 @@ export default function Services() {
           display: "inline-flex",
           alignItems: "center",
           gap: "0.5rem",
-          whiteSpace: "nowrap",
         }}>
-          Start a project <span>↗</span>
+          Start a project ↗
         </a>
       </div>
     </section>

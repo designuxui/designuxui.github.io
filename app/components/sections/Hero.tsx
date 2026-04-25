@@ -2,65 +2,107 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
+// 8 placeholder image slots — Ashley has 8 photos that follow cursor
+const IMAGES = [
+  { id: 1, label: "Project 01" },
+  { id: 2, label: "Project 02" },
+  { id: 3, label: "Project 03" },
+  { id: 4, label: "Project 04" },
+  { id: 5, label: "Project 05" },
+  { id: 6, label: "Project 06" },
+  { id: 7, label: "Project 07" },
+  { id: 8, label: "Project 08" },
+];
+
+// Placeholder colors for images before real photos
+const BG_COLORS = [
+  "#d4cfc6", "#c8c3ba", "#ddd9cf",
+  "#cdc9bf", "#d8d4ca", "#c4bfb5",
+  "#e0dbd0", "#ccc8be",
+];
+
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const imagesRef = useRef<HTMLDivElement[]>([]);
+  const cursorPos = useRef({ x: 0, y: 0 });
+  const currentIdx = useRef(0);
+  const lastTrigger = useRef(0);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Entrance animation
-      gsap.set(".hero-line", { opacity: 0, y: 80 });
-      gsap.set(".hero-sub", { opacity: 0, y: 24 });
-      gsap.set(".hero-cta", { opacity: 0, y: 16 });
-      gsap.set(".hero-photo", { opacity: 0, scale: 0.96 });
+      // Entrance animations — staggered like Ashley
+      gsap.set(".hero-name", { opacity: 0, y: 60 });
+      gsap.set(".hero-studio", { opacity: 0, y: 40 });
+      gsap.set(".hero-tagline", { opacity: 0, y: 30 });
+      gsap.set(".hero-cta-row", { opacity: 0, y: 20 });
 
-      const tl = gsap.timeline({ delay: 0.1 });
-      tl.to(".hero-line", {
-        opacity: 1, y: 0, duration: 1, ease: "power4.out", stagger: 0.08,
-      })
-        .to(".hero-sub", { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.5")
-        .to(".hero-cta", { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.5)", stagger: 0.1 }, "-=0.4")
-        .to(".hero-photo", {
-          opacity: 1, scale: 1, duration: 0.9, ease: "power3.out", stagger: 0.07,
-        }, "-=0.7");
-
-      // Letter proximity repulsion
-      const letters = Array.from(sectionRef.current?.querySelectorAll(".hl") ?? []);
-      const xQ = letters.map((el) => gsap.quickTo(el, "x", { duration: 0.45, ease: "power3.out" }));
-      const yQ = letters.map((el) => gsap.quickTo(el, "y", { duration: 0.45, ease: "power3.out" }));
-
-      const onMove = (e: MouseEvent) => {
-        letters.forEach((el, i) => {
-          const r = (el as HTMLElement).getBoundingClientRect();
-          const cx = r.left + r.width / 2;
-          const cy = r.top + r.height / 2;
-          const dx = e.clientX - cx;
-          const dy = e.clientY - cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 130) {
-            const f = (1 - dist / 130) * 30;
-            xQ[i]((-dx / dist) * f);
-            yQ[i]((-dy / dist) * f);
-          } else {
-            xQ[i](0);
-            yQ[i](0);
-          }
-        });
-      };
-      window.addEventListener("mousemove", onMove);
-      return () => window.removeEventListener("mousemove", onMove);
+      const tl = gsap.timeline({ delay: 0.15 });
+      tl.to(".hero-name", { opacity: 1, y: 0, duration: 1.1, ease: "power4.out" })
+        .to(".hero-studio", { opacity: 1, y: 0, duration: 0.9, ease: "power4.out" }, "-=0.7")
+        .to(".hero-tagline", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, "-=0.5")
+        .to(".hero-cta-row", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.4");
     }, sectionRef);
-    return () => ctx.revert();
-  }, []);
 
-  // Photo grid — 6 placeholder slots like Ashley's work grid
-  const photos = [
-    { id: 1, aspect: "tall", label: "SaaS Onboarding Redesign" },
-    { id: 2, aspect: "wide", label: "E-commerce Funnel" },
-    { id: 3, aspect: "square", label: "B2B Sales System" },
-    { id: 4, aspect: "wide", label: "UX Audit — Fintech" },
-    { id: 5, aspect: "tall", label: "Product Strategy" },
-    { id: 6, aspect: "square", label: "CRM Pipeline" },
-  ];
+    // Cursor-follow images — Ashley's signature effect
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = section.getBoundingClientRect();
+      cursorPos.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+
+      const now = Date.now();
+      if (now - lastTrigger.current < 320) return; // throttle — new image every 320ms
+      lastTrigger.current = now;
+
+      const imgs = imagesRef.current;
+      if (!imgs.length) return;
+
+      const idx = currentIdx.current % imgs.length;
+      const el = imgs[idx];
+      currentIdx.current++;
+
+      // Position image near cursor with slight random offset
+      const offsetX = (Math.random() - 0.5) * 80;
+      const offsetY = (Math.random() - 0.5) * 60;
+      const rotate = (Math.random() - 0.5) * 18;
+
+      gsap.set(el, {
+        x: cursorPos.current.x + offsetX - 90,
+        y: cursorPos.current.y + offsetY - 120,
+        rotation: rotate,
+        scale: 0.6,
+        opacity: 0,
+        zIndex: 10 + (currentIdx.current % 20),
+      });
+
+      gsap.to(el, {
+        scale: 1,
+        opacity: 1,
+        duration: 0.35,
+        ease: "power3.out",
+      });
+
+      // Fade out after delay
+      gsap.to(el, {
+        opacity: 0,
+        scale: 0.85,
+        y: `+=${30}`,
+        duration: 0.6,
+        ease: "power2.in",
+        delay: 0.9,
+      });
+    };
+
+    section.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      section.removeEventListener("mousemove", handleMouseMove);
+      ctx.revert();
+    };
+  }, []);
 
   return (
     <section
@@ -69,121 +111,155 @@ export default function Hero() {
       style={{
         background: "#f5f0e8",
         minHeight: "100dvh",
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "0",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* LEFT — Text */}
-      <div style={{
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "clamp(80px,10vw,130px) clamp(1.5rem,4vw,4rem) clamp(2rem,4vw,4rem)",
+        padding: "clamp(100px,12vw,140px) clamp(1.5rem,5vw,5rem) clamp(3rem,5vw,5rem)",
         position: "relative",
-        zIndex: 2,
-      }}>
-        {/* Top label */}
-        <div className="hero-line" style={{
-          fontFamily: "var(--font-unbounded)",
-          fontSize: "0.6rem",
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: "rgba(10,10,10,0.4)",
-        }}>
-          UX · Product · Growth — Remote worldwide
-        </div>
-
-        {/* Main headline */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 0" }}>
-          <h1 style={{
-            fontFamily: "var(--font-unbounded)",
-            fontWeight: 900,
-            fontSize: "clamp(2.8rem,6.5vw,7rem)",
-            lineHeight: 0.92,
-            letterSpacing: "-0.04em",
-            color: "#0a0a0a",
-            margin: 0,
+        overflow: "hidden",
+        cursor: "none",
+      }}
+    >
+      {/* Cursor-follow images — invisible until mousemove */}
+      {IMAGES.map((img, i) => (
+        <div
+          key={img.id}
+          ref={(el) => { if (el) imagesRef.current[i] = el; }}
+          style={{
+            position: "absolute",
+            width: "clamp(140px,14vw,220px)",
+            aspectRatio: "3/4",
+            borderRadius: "3px",
+            overflow: "hidden",
+            opacity: 0,
+            pointerEvents: "none",
+            top: 0,
+            left: 0,
+            background: BG_COLORS[i],
+            zIndex: 5,
+          }}
+        >
+          {/* Placeholder — swap with <img src="..." /> when ready */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            padding: "0.75rem",
+            background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 50%)",
           }}>
-            {/* WHERE */}
-            <div className="hero-line" style={{ overflow: "hidden", display: "block" }}>
-              <span style={{ display: "inline-flex" }}>
-                {"WHERE".split("").map((ch, i) => (
-                  <span key={i} className="hl" style={{ display: "inline-block", willChange: "transform", cursor: "default", color: "#0a0a0a" }}>{ch}</span>
-                ))}
-              </span>
-            </div>
-            {/* DESIGN */}
-            <div className="hero-line" style={{ overflow: "hidden", display: "block" }}>
-              <span style={{ display: "inline-flex" }}>
-                {"DESIGN".split("").map((ch, i) => (
-                  <span key={i} className="hl" style={{ display: "inline-block", willChange: "transform", cursor: "default", color: "transparent", WebkitTextStroke: "1.5px #0a0a0a" }}>{ch}</span>
-                ))}
-              </span>
-            </div>
-            {/* MEETS */}
-            <div className="hero-line" style={{ overflow: "hidden", display: "block" }}>
-              <span style={{ display: "inline-flex" }}>
-                {"MEETS".split("").map((ch, i) => (
-                  <span key={i} className="hl" style={{ display: "inline-block", willChange: "transform", cursor: "default", color: "rgba(10,10,10,0.35)" }}>{ch}</span>
-                ))}
-              </span>
-            </div>
-            {/* GROWTH */}
-            <div className="hero-line" style={{ overflow: "hidden", display: "block" }}>
-              <span style={{ display: "inline-flex" }}>
-                {"GROWTH".split("").map((ch, i) => (
-                  <span key={i} className="hl" style={{ display: "inline-block", willChange: "transform", cursor: "default", color: "#c8f542" }}>{ch}</span>
-                ))}
-              </span>
-            </div>
-          </h1>
-
-          <div className="hero-sub" style={{ marginTop: "2rem", maxWidth: "38rem" }}>
-            <p style={{
+            <span style={{
               fontFamily: "var(--font-unbounded)",
-              fontWeight: 400,
-              fontSize: "clamp(0.75rem,1.2vw,1rem)",
-              color: "rgba(10,10,10,0.55)",
-              lineHeight: 1.65,
-              letterSpacing: "-0.01em",
-              caretColor: "transparent",
-              userSelect: "none",
+              fontSize: "0.48rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.7)",
             }}>
-              Led by a strategist who refuses to stay in a single lane — UX, product and revenue systems, built together.
-            </p>
+              {img.label}
+            </span>
+          </div>
+          {/* Photo placeholder icon */}
+          <div style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-60%)",
+            opacity: 0.18,
+          }}>
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+              <rect x="2" y="2" width="36" height="36" rx="2" stroke="#0a0a0a" strokeWidth="1.5"/>
+              <circle cx="13" cy="13" r="4" stroke="#0a0a0a" strokeWidth="1.5"/>
+              <path d="M2 28L12 18L20 26L26 20L38 32" stroke="#0a0a0a" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           </div>
         </div>
+      ))}
 
-        {/* Bottom CTAs */}
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
-          <a href="#contact" className="hero-cta" style={{
+      {/* Main content */}
+      <div style={{ position: "relative", zIndex: 10 }}>
+        {/* Studio name — like Ashley's "Ashley Brooke" */}
+        <div className="hero-name" style={{
+          fontFamily: "var(--font-unbounded)",
+          fontWeight: 900,
+          fontSize: "clamp(3.5rem,9vw,9rem)",
+          lineHeight: 0.9,
+          letterSpacing: "-0.04em",
+          color: "#0a0a0a",
+          marginBottom: "0.2em",
+        }}>
+          Bridge
+          <span style={{ color: "#c8f542" }}>.</span>
+        </div>
+
+        {/* Subtitle — like "creative Studio" in Ashley's italic serif */}
+        <div className="hero-studio" style={{
+          fontFamily: "var(--font-unbounded)",
+          fontWeight: 400,
+          fontStyle: "italic",
+          fontSize: "clamp(1.8rem,4.5vw,5rem)",
+          lineHeight: 1,
+          letterSpacing: "-0.03em",
+          color: "rgba(10,10,10,0.45)",
+          marginBottom: "clamp(2rem,4vw,4rem)",
+        }}>
+          UX &amp; Growth Studio
+        </div>
+
+        {/* Tagline — like Ashley's one-liner */}
+        <p className="hero-tagline" style={{
+          fontFamily: "var(--font-unbounded)",
+          fontWeight: 400,
+          fontSize: "clamp(0.75rem,1.4vw,1.05rem)",
+          lineHeight: 1.65,
+          letterSpacing: "-0.01em",
+          color: "rgba(10,10,10,0.55)",
+          maxWidth: "42rem",
+          caretColor: "transparent",
+          userSelect: "none",
+        }}>
+          Led by a strategist who refuses to stay in a single lane — UX, product and revenue systems, built together.
+        </p>
+      </div>
+
+      {/* Bottom row — CTA + scroll like Ashley */}
+      <div className="hero-cta-row" style={{
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
+        position: "relative",
+        zIndex: 10,
+      }}>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <a href="#contact" style={{
             fontFamily: "var(--font-unbounded)",
             fontWeight: 700,
             fontSize: "clamp(0.55rem,0.9vw,0.65rem)",
-            letterSpacing: "0.12em",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
-            padding: "clamp(0.7rem,1.5vw,1rem) clamp(1.5rem,2.5vw,2.2rem)",
+            padding: "0.9rem 2rem",
             background: "#0a0a0a",
             color: "#f5f0e8",
             borderRadius: 100,
             textDecoration: "none",
-            whiteSpace: "nowrap",
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
-          }}>
-            Start a project <span style={{ fontSize: "0.9em" }}>↗</span>
+            whiteSpace: "nowrap",
+            transition: "background 0.25s",
+          }}
+            onMouseEnter={e => (e.currentTarget.style.background = "#c8f542") && (e.currentTarget.style.color = "#0a0a0a") as never}
+            onMouseLeave={e => (e.currentTarget.style.background = "#0a0a0a") && (e.currentTarget.style.color = "#f5f0e8") as never}
+          >
+            Create with us ↗
           </a>
-          <a href="#cases" className="hero-cta" style={{
+          <a href="#about" style={{
             fontFamily: "var(--font-unbounded)",
             fontWeight: 400,
             fontSize: "clamp(0.52rem,0.85vw,0.62rem)",
-            letterSpacing: "0.12em",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
-            padding: "clamp(0.7rem,1.5vw,1rem) clamp(1.5rem,2.5vw,2.2rem)",
+            padding: "0.9rem 2rem",
             background: "transparent",
             color: "#0a0a0a",
             border: "1px solid rgba(10,10,10,0.2)",
@@ -191,90 +267,25 @@ export default function Hero() {
             textDecoration: "none",
             whiteSpace: "nowrap",
           }}>
-            See the work
+            Our work
           </a>
         </div>
-      </div>
 
-      {/* RIGHT — Photo grid like Ashley */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gridTemplateRows: "1fr 1fr 1fr",
-        gap: "6px",
-        padding: "6px 6px 6px 0",
-        height: "100dvh",
-      }}>
-        {photos.map((p, i) => (
-          <div
-            key={p.id}
-            className="hero-photo"
-            style={{
-              background: i % 3 === 0 ? "#e0dbd0" : i % 3 === 1 ? "#d4d0c8" : "#ccc8be",
-              borderRadius: "4px",
-              overflow: "hidden",
-              position: "relative",
-              gridRow: i === 0 ? "span 2" : i === 4 ? "span 2" : "span 1",
-            }}
-          >
-            {/* Placeholder content */}
-            <div style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              padding: "1rem",
-              background: "linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 50%)",
-            }}>
-              <span style={{
-                fontFamily: "var(--font-unbounded)",
-                fontSize: "0.55rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.7)",
-              }}>
-                {p.label}
-              </span>
-            </div>
-            {/* Placeholder icon */}
-            <div style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -60%)",
-              width: "40px",
-              height: "40px",
-              opacity: 0.2,
-            }}>
-              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="2" y="2" width="36" height="36" rx="2" stroke="#0a0a0a" strokeWidth="1.5"/>
-                <circle cx="13" cy="13" r="4" stroke="#0a0a0a" strokeWidth="1.5"/>
-                <path d="M2 28L12 18L20 26L26 20L38 32" stroke="#0a0a0a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Scroll indicator */}
-      <div style={{
-        position: "absolute",
-        bottom: "2rem",
-        left: "clamp(1.5rem,4vw,4rem)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "0.5rem",
-        fontFamily: "var(--font-unbounded)",
-        fontSize: "0.38rem",
-        letterSpacing: "0.35em",
-        textTransform: "uppercase",
-        color: "rgba(10,10,10,0.25)",
-        zIndex: 3,
-      }}>
-        <span>Scroll</span>
-        <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(10,10,10,0.3), transparent)" }} />
+        {/* Scroll indicator */}
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "0.5rem",
+          fontFamily: "var(--font-unbounded)",
+          fontSize: "0.38rem",
+          letterSpacing: "0.35em",
+          textTransform: "uppercase",
+          color: "rgba(10,10,10,0.25)",
+        }}>
+          <span>Scroll</span>
+          <div style={{ width: 1, height: 32, background: "linear-gradient(to bottom, rgba(10,10,10,0.3), transparent)" }} />
+        </div>
       </div>
     </section>
   );
