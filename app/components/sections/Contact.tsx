@@ -1,191 +1,342 @@
 "use client";
-
-import { FormEvent, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { batchReveal } from "../ui/ScrollBatch";
-
 gsap.registerPlugin(ScrollTrigger);
 
-const section: React.CSSProperties = {
-  padding: "7rem 4rem",
-  background: "#f5f2eb",
-  color: "#0a0a0a",
-  fontFamily: "var(--font-dm-sans)",
-};
-
-const eyebrow: React.CSSProperties = {
-  fontFamily: "var(--font-unbounded)",
-  fontSize: "0.72rem",
-  fontWeight: 700,
-  letterSpacing: "0.22em",
-  textTransform: "uppercase",
-  color: "#c8f542",
-  marginBottom: "3rem",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontFamily: "var(--font-unbounded)",
-  fontSize: "0.65rem",
-  fontWeight: 700,
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
-  color: "rgba(10, 10, 10, 0.55)",
-  marginBottom: "0.5rem",
-};
-
-const fieldStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "0.85rem 1rem",
-  fontFamily: "var(--font-dm-sans)",
-  fontSize: "1rem",
-  color: "#0a0a0a",
-  background: "rgba(10, 10, 10, 0.02)",
-  border: "1px solid rgba(10, 10, 10, 0.08)",
-  borderRadius: "4px",
-  outline: "none",
-};
-
-function clamp(n: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, n));
-}
-
 export default function Contact() {
-  const [sent, setSent] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const magneticWrapRef = useRef<HTMLDivElement>(null);
-  const submitRef = useRef<HTMLButtonElement>(null);
 
-  useLayoutEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
+  useEffect(() => {
     const ctx = gsap.context(() => {
-      batchReveal(el, {
-        selector: ".contact-reveal",
-        start: "top 80%",
-        distance: 40,
-        duration: 0.85,
-        stagger: 0.1,
-        batchMax: 6,
+      gsap.fromTo(".contact-line", {
+        opacity: 0, y: 40,
+      }, {
+        opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.1,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 70%",
+        },
       });
-    }, el);
-
+      gsap.fromTo(".contact-form-el", {
+        opacity: 0, y: 20,
+      }, {
+        opacity: 1, y: 0, duration: 0.6, ease: "power3.out", stagger: 0.06,
+        scrollTrigger: {
+          trigger: ".contact-form-el",
+          start: "top 80%",
+        },
+      });
+    }, sectionRef);
     return () => ctx.revert();
   }, []);
 
-  useLayoutEffect(() => {
-    const wrap = magneticWrapRef.current;
-    const btn = submitRef.current;
-    if (!wrap || !btn) return;
-
-    const reset = () => {
-      gsap.to(btn, { x: 0, y: 0, duration: 0.35, ease: "power3.out" });
-    };
-
-    const onMove = (e: MouseEvent) => {
-      const r = wrap.getBoundingClientRect();
-      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
-        reset();
-        return;
-      }
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const dx = (e.clientX - cx) * 0.22;
-      const dy = (e.clientY - cy) * 0.22;
-      gsap.to(btn, {
-        x: clamp(dx, -14, 14),
-        y: clamp(dy, -12, 12),
-        duration: 0.25,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    };
-
-    wrap.addEventListener("mousemove", onMove);
-    wrap.addEventListener("mouseleave", reset);
-    return () => {
-      wrap.removeEventListener("mousemove", onMove);
-      wrap.removeEventListener("mouseleave", reset);
-    };
-  }, []);
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSent(true);
-  }
-
   return (
-    <section ref={sectionRef} id="contact" className="relative overflow-hidden" style={section}>
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,245,66,0.1) 0%, transparent 50%)" }} />
-      <p className="contact-reveal" style={eyebrow}>
-        Contact
-      </p>
-      <div style={{ maxWidth: "36rem" }}>
-        <h2
-          className="contact-reveal"
-          style={{
+    <section
+      ref={sectionRef}
+      id="contact"
+      style={{
+        background: "#f5f0e8",
+        borderTop: "1px solid rgba(10,10,10,0.08)",
+        padding: "clamp(5rem,10vw,10rem) clamp(1.5rem,4vw,4rem)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Subtle accent glow */}
+      <div style={{
+        position: "absolute",
+        bottom: 0,
+        right: 0,
+        width: "40vw",
+        height: "40vw",
+        background: "radial-gradient(circle, rgba(200,245,66,0.1) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ maxWidth: "72rem", margin: "0 auto" }}>
+        {/* Big closing statement — like Ashley's "We take pride in..." */}
+        <div style={{ marginBottom: "5rem" }}>
+          <p className="contact-line" style={{
+            fontFamily: "var(--font-unbounded)",
+            fontSize: "0.68rem",
+            fontWeight: 700,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#c8f542",
+            marginBottom: "2rem",
+          }}>
+            Contact
+          </p>
+          <h2 className="contact-line" style={{
             fontFamily: "var(--font-unbounded)",
             fontWeight: 900,
-            fontSize: "clamp(2rem, 4vw, 2.75rem)",
-            letterSpacing: "-0.03em",
-            lineHeight: 1.1,
-            marginBottom: "1rem",
+            fontSize: "clamp(2.2rem,6vw,5.5rem)",
+            lineHeight: 1.0,
+            letterSpacing: "-0.04em",
             color: "#0a0a0a",
-          }}
-        >
-          Start a project
-        </h2>
-        <p className="contact-reveal" style={{ fontSize: "1.05rem", lineHeight: 1.65, color: "rgba(10, 10, 10, 0.55)", marginBottom: "2.5rem" }}>
-          Tell me about your project — I'll get back within 24 hours.
-        </p>
-        <form className="contact-reveal" onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "1.25rem" }}>
-            <label htmlFor="contact-name" style={labelStyle}>
-              Name
-            </label>
-            <input id="contact-name" name="name" type="text" autoComplete="name" required style={fieldStyle} />
-          </div>
-          <div style={{ marginBottom: "1.25rem" }}>
-            <label htmlFor="contact-email" style={labelStyle}>
-              Email
-            </label>
-            <input id="contact-email" name="email" type="email" autoComplete="email" required style={fieldStyle} />
-          </div>
-          <div style={{ marginBottom: "1.75rem" }}>
-            <label htmlFor="contact-message" style={labelStyle}>
-              Message
-            </label>
-            <textarea id="contact-message" name="message" required rows={5} style={{ ...fieldStyle, resize: "vertical", minHeight: "8rem" }} />
-          </div>
-          <div ref={magneticWrapRef} className="inline-block py-2" style={{ paddingLeft: "0.25rem", paddingRight: "0.25rem" }}>
-            <button
-              ref={submitRef}
-              type="submit"
-              data-cursor
-              style={{
+            marginBottom: "1rem",
+            maxWidth: "20ch",
+          }}>
+            We take pride in work that <span style={{ fontStyle: "italic", color: "rgba(10,10,10,0.45)" }}>performs</span> because it refuses to behave.
+          </h2>
+          <p className="contact-line" style={{
+            fontFamily: "var(--font-unbounded)",
+            fontSize: "clamp(0.75rem,1.5vw,1rem)",
+            color: "rgba(10,10,10,0.5)",
+            lineHeight: 1.65,
+            maxWidth: "36rem",
+          }}>
+            We&apos;re ready when you are.
+          </p>
+        </div>
+
+        {/* Two column layout — form left, info right */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "4rem",
+          alignItems: "start",
+        }}>
+          {/* Form */}
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
+          >
+            <div className="contact-form-el">
+              <label style={{
+                display: "block",
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.58rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.45)",
+                marginBottom: "0.5rem",
+              }}>Name</label>
+              <input
+                type="text"
+                name="name"
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.9rem 1rem",
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "1rem",
+                  color: "#0a0a0a",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: "1px solid rgba(10,10,10,0.2)",
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => e.target.style.borderBottomColor = "#0a0a0a"}
+                onBlur={(e) => e.target.style.borderBottomColor = "rgba(10,10,10,0.2)"}
+              />
+            </div>
+            <div className="contact-form-el">
+              <label style={{
+                display: "block",
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.58rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.45)",
+                marginBottom: "0.5rem",
+              }}>Email</label>
+              <input
+                type="email"
+                name="email"
+                required
+                style={{
+                  width: "100%",
+                  padding: "0.9rem 1rem",
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "1rem",
+                  color: "#0a0a0a",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: "1px solid rgba(10,10,10,0.2)",
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => e.target.style.borderBottomColor = "#0a0a0a"}
+                onBlur={(e) => e.target.style.borderBottomColor = "rgba(10,10,10,0.2)"}
+              />
+            </div>
+            <div className="contact-form-el">
+              <label style={{
+                display: "block",
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.58rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.45)",
+                marginBottom: "0.5rem",
+              }}>Message</label>
+              <textarea
+                name="message"
+                required
+                rows={5}
+                style={{
+                  width: "100%",
+                  padding: "0.9rem 1rem",
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "1rem",
+                  color: "#0a0a0a",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: "1px solid rgba(10,10,10,0.2)",
+                  outline: "none",
+                  resize: "vertical",
+                  minHeight: "8rem",
+                  transition: "border-color 0.2s",
+                }}
+                onFocus={(e) => e.target.style.borderBottomColor = "#0a0a0a"}
+                onBlur={(e) => e.target.style.borderBottomColor = "rgba(10,10,10,0.2)"}
+              />
+            </div>
+            <div className="contact-form-el" style={{ paddingTop: "0.5rem" }}>
+              <button type="submit" style={{
                 fontFamily: "var(--font-unbounded)",
                 fontWeight: 700,
-                fontSize: "0.75rem",
-                letterSpacing: "0.1em",
+                fontSize: "0.65rem",
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
-                padding: "1rem 2rem",
-                background: "#c8f542",
-                color: "#0a0a0a",
+                padding: "1rem 2.5rem",
+                background: "#0a0a0a",
+                color: "#f5f0e8",
                 border: "none",
-                borderRadius: "100px",
+                borderRadius: 100,
                 cursor: "pointer",
-                willChange: "transform",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                transition: "transform 0.2s, background 0.2s",
               }}
-            >
-              Send message
-            </button>
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "#c8f542";
+                  (e.currentTarget as HTMLButtonElement).style.color = "#0a0a0a";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "#0a0a0a";
+                  (e.currentTarget as HTMLButtonElement).style.color = "#f5f0e8";
+                }}
+              >
+                Send message <span>↗</span>
+              </button>
+            </div>
+          </form>
+
+          {/* Right — contact info + links like Ashley's footer info */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "3rem", paddingTop: "1rem" }}>
+            <div>
+              <p style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.58rem",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.35)",
+                marginBottom: "0.75rem",
+              }}>Business enquiries</p>
+              <a href="mailto:hello@bridgeuxlab.com" style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "clamp(0.85rem,1.5vw,1.1rem)",
+                fontWeight: 700,
+                color: "#0a0a0a",
+                textDecoration: "none",
+                letterSpacing: "-0.01em",
+                borderBottom: "1px solid rgba(10,10,10,0.2)",
+                paddingBottom: "2px",
+              }}>
+                hello@bridgeuxlab.com
+              </a>
+            </div>
+
+            <div>
+              <p style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.58rem",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.35)",
+                marginBottom: "0.75rem",
+              }}>Availability</p>
+              <p style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.85rem",
+                color: "#0a0a0a",
+                lineHeight: 1.6,
+              }}>
+                <span style={{ color: "#c8f542", marginRight: "0.5rem" }}>●</span>
+                Open to work — Remote worldwide
+              </p>
+            </div>
+
+            <div>
+              <p style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.58rem",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "rgba(10,10,10,0.35)",
+                marginBottom: "1rem",
+              }}>Navigate</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {["Services", "Work", "About", "Marketplace"].map((link) => (
+                  <a
+                    key={link}
+                    href={`#${link.toLowerCase()}`}
+                    style={{
+                      fontFamily: "var(--font-unbounded)",
+                      fontSize: "0.7rem",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      color: "rgba(10,10,10,0.45)",
+                      textDecoration: "none",
+                      transition: "color 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#0a0a0a")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(10,10,10,0.45)")}
+                  >
+                    {link}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
-          {sent ? (
-            <p style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#c8f542" }}>Thanks—placeholder submit.</p>
-          ) : null}
-        </form>
+        </div>
+
+        {/* Footer bottom */}
+        <div style={{
+          marginTop: "6rem",
+          paddingTop: "2rem",
+          borderTop: "1px solid rgba(10,10,10,0.08)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "1rem",
+        }}>
+          <p style={{
+            fontFamily: "var(--font-unbounded)",
+            fontSize: "0.58rem",
+            letterSpacing: "0.1em",
+            color: "rgba(10,10,10,0.3)",
+          }}>
+            © Bridge. 2025 · All rights reserved.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-unbounded)",
+            fontSize: "0.58rem",
+            letterSpacing: "0.1em",
+            color: "rgba(10,10,10,0.3)",
+          }}>
+            UX · Product · Growth
+          </p>
+        </div>
       </div>
     </section>
   );

@@ -1,142 +1,272 @@
 "use client";
-
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { batchReveal } from "../ui/ScrollBatch";
-import ProximityCard from "../ui/ProximityCard";
-import AnimatedText from "../ui/AnimatedText";
-
 gsap.registerPlugin(ScrollTrigger);
 
 const CASES = [
-  { name: "SaaS onboarding", metric: "+40%", detail: "Streamlined signup and activation for a B2B analytics product." },
-  { name: "E‑commerce funnel", metric: "3x", detail: "Category navigation and checkout experiments over two quarters." },
-  { name: "B2B pipeline", metric: "2x", detail: "CRM hygiene, sequences, and marketing-to-sales alignment." },
-] as const;
+  {
+    num: "01",
+    metric: "+40%",
+    title: "SaaS Onboarding Redesign",
+    client: "B2B Analytics Platform",
+    year: "2024",
+    description: "Streamlined the entire activation flow — from signup to first value moment. Removed 6 friction points, rewrote onboarding copy, redesigned the empty states.",
+    tags: ["UX Audit", "Figma", "A/B Testing", "Product"],
+    bg: "#1a1a1a",
+    accent: "#c8f542",
+  },
+  {
+    num: "02",
+    metric: "3×",
+    title: "E-commerce Funnel Overhaul",
+    client: "Fashion & Lifestyle Brand",
+    year: "2024",
+    description: "Category navigation, product page redesign and checkout experiments over two quarters. Three times higher conversion on mobile.",
+    tags: ["Conversion", "Mobile UX", "Checkout", "Analytics"],
+    bg: "#f2efe8",
+    accent: "#0a0a0a",
+  },
+  {
+    num: "03",
+    metric: "2×",
+    title: "B2B Pipeline Rebuild",
+    client: "SaaS Sales Team",
+    year: "2023",
+    description: "CRM hygiene, outbound sequences, and marketing-to-sales alignment. Deal cycle cut by 20%, pipeline velocity doubled.",
+    tags: ["CRM", "Sales Strategy", "B2B", "HubSpot"],
+    bg: "#0a0a0a",
+    accent: "#c8f542",
+  },
+];
 
 export default function Cases() {
   const sectionRef = useRef<HTMLElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    const section = sectionRef.current;
-    const pin = pinRef.current;
-    const track = trackRef.current;
-    if (!section || !pin || !track) return;
-
-    const cards = gsap.utils.toArray<HTMLElement>(".case-card");
-
+  useEffect(() => {
     const ctx = gsap.context(() => {
-      batchReveal(section, {
-        selector: ".case-card",
-        start: "top 85%",
-        distance: 40,
-        duration: 0.8,
-        stagger: 0.08,
-        batchMax: 5,
+      gsap.utils.toArray<HTMLElement>(".case-item").forEach((el) => {
+        gsap.fromTo(el, {
+          opacity: 0, y: 50,
+        }, {
+          opacity: 1, y: 0, duration: 0.9, ease: "power3.out",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 80%",
+          },
+        });
       });
-
-      const scrollAmount = () => Math.max(track.scrollWidth - window.innerWidth + 128, 1);
-
-      const tween = gsap.to(track, {
-        x: () => -scrollAmount(),
-        ease: "none",
-      });
-
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top top",
-        end: () => `+=${scrollAmount()}`,
-        pin: pin,
-        scrub: 1,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        animation: tween,
-        onUpdate: () => {
-          const vw = window.innerWidth * 0.5;
-          cards.forEach((card) => {
-            const r = card.getBoundingClientRect();
-            const cx = r.left + r.width / 2;
-            const n = (cx - vw) / Math.max(vw, 1);
-            gsap.set(card, { transformPerspective: 1000, rotationY: gsap.utils.clamp(-10, 10, -n * 10) });
-          });
-        },
-      });
-    }, section);
-
+    }, sectionRef);
     return () => ctx.revert();
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      id="cases"
-      className="relative overflow-hidden"
-      style={{
-        background: "var(--bg)",
-        color: "var(--fg)",
-        fontFamily: "var(--font-dm-sans)",
-      }}
-    >
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 10% 80%, rgba(255,60,0,0.12) 0%, transparent 50%)" }} />
-      <div className="pointer-events-none absolute bottom-0 right-0" style={{ width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,60,0,0.08) 0%, transparent 60%)", filter: "blur(50px)" }} />
-      <div ref={pinRef} className="flex h-[100dvh] flex-col justify-center overflow-hidden" style={{ paddingLeft: "4rem", paddingRight: "4rem" }}>
-        <header className="mb-10 shrink-0">
-          <p className="mb-4 text-[0.72rem] font-bold uppercase tracking-[0.22em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}>
-            Selected work
-          </p>
-          <AnimatedText
-            text="Case studies"
-            split="words"
-            delay={0.1}
-            style={{
-              fontFamily: "var(--font-unbounded)",
-              fontSize: "clamp(2rem,4vw,3rem)",
-              fontWeight: 900,
-              lineHeight: "tight",
-              letterSpacing: "-0.03em",
-              textTransform: "uppercase",
-              color: "var(--fg)",
-            }}
-          />
-        </header>
-        <div className="min-h-0 flex-1 overflow-hidden" style={{ perspective: "1200px" }}>
-          <div ref={trackRef} className="flex h-full items-stretch gap-10 pr-16 will-change-transform">
-            {CASES.map((c) => (
-              <ProximityCard
-                key={c.name}
-                glowColor="rgba(200,245,66,0.2)"
-                className="case-card flex shrink-0 flex-col justify-between border"
-                style={{
-                  width: "min(78vw, 440px)",
-                  borderColor: "var(--line)",
-                  background: "var(--card)",
-                  borderRadius: "4px",
-                  padding: "2.5rem",
-                  transformStyle: "preserve-3d",
-                }}
-              >
-                <div>
-                  <p className="mb-4 text-[clamp(3rem,8vw,5rem)] font-black leading-none tracking-[-0.05em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}>
-                    {c.metric}
-                  </p>
-                  <h3 className="mb-4 text-xl font-bold tracking-tight" style={{ fontFamily: "var(--font-unbounded)", color: "var(--fg)" }}>
-                    {c.name}
-                  </h3>
-                  <p className="text-[0.95rem] leading-relaxed" style={{ color: "var(--dim)" }}>
-                    {c.detail}
-                  </p>
-                </div>
-                <span className="mt-10 text-[0.62rem] uppercase tracking-[0.14em]" style={{ fontFamily: "var(--font-unbounded)", color: "var(--acc)" }}>
-                  Scroll →
-                </span>
-              </ProximityCard>
-            ))}
-          </div>
+    <section ref={sectionRef} id="cases" style={{ background: "#080808" }}>
+      {/* Header */}
+      <div style={{
+        padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,4rem) 0",
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
+        borderBottom: "1px solid rgba(238,241,230,0.06)",
+        paddingBottom: "2rem",
+        marginBottom: "0",
+      }}>
+        <div>
+          <p style={{
+            fontFamily: "var(--font-unbounded)",
+            fontSize: "0.68rem",
+            fontWeight: 700,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "#c8f542",
+            marginBottom: "0.75rem",
+          }}>Selected work</p>
+          <h2 style={{
+            fontFamily: "var(--font-unbounded)",
+            fontWeight: 900,
+            fontSize: "clamp(2rem,5vw,4rem)",
+            letterSpacing: "-0.04em",
+            lineHeight: 0.95,
+            color: "#eef1e6",
+            margin: 0,
+          }}>
+            Case studies
+          </h2>
         </div>
+        <p style={{
+          fontFamily: "var(--font-unbounded)",
+          fontSize: "0.6rem",
+          color: "rgba(238,241,230,0.25)",
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          paddingBottom: "0.5rem",
+        }}>
+          3 projects
+        </p>
       </div>
+
+      {/* Cases — full width rows like Ashley's work grid */}
+      {CASES.map((c) => (
+        <article
+          key={c.num}
+          className="case-item"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            minHeight: "70vh",
+            borderBottom: "1px solid rgba(238,241,230,0.06)",
+          }}
+        >
+          {/* Left — photo placeholder */}
+          <div style={{
+            background: c.bg,
+            position: "relative",
+            overflow: "hidden",
+            minHeight: "50vw",
+          }}>
+            {/* Gradient overlay */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: `radial-gradient(ellipse 60% 60% at 50% 50%, ${c.accent}18 0%, transparent 70%)`,
+            }} />
+            {/* Placeholder image icon */}
+            <div style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%,-50%)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
+            }}>
+              <svg width="48" height="48" viewBox="0 0 40 40" fill="none" opacity={0.2}>
+                <rect x="2" y="2" width="36" height="36" rx="2" stroke={c.accent} strokeWidth="1.5"/>
+                <circle cx="13" cy="13" r="4" stroke={c.accent} strokeWidth="1.5"/>
+                <path d="M2 28L12 18L20 26L26 20L38 32" stroke={c.accent} strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.5rem",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: c.accent,
+                opacity: 0.4,
+              }}>
+                Add photo
+              </span>
+            </div>
+            {/* Case number */}
+            <div style={{
+              position: "absolute",
+              top: "1.5rem",
+              left: "1.5rem",
+              fontFamily: "var(--font-unbounded)",
+              fontSize: "0.55rem",
+              letterSpacing: "0.15em",
+              color: c.accent,
+              opacity: 0.5,
+            }}>
+              {c.num}
+            </div>
+          </div>
+
+          {/* Right — content */}
+          <div style={{
+            padding: "clamp(2.5rem,5vw,5rem)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            background: "#080808",
+            borderLeft: "1px solid rgba(238,241,230,0.06)",
+          }}>
+            <div>
+              {/* Metric */}
+              <p style={{
+                fontFamily: "var(--font-unbounded)",
+                fontWeight: 900,
+                fontSize: "clamp(3.5rem,8vw,6rem)",
+                lineHeight: 1,
+                letterSpacing: "-0.05em",
+                color: c.accent,
+                margin: "0 0 1.5rem",
+              }}>
+                {c.metric}
+              </p>
+
+              {/* Title */}
+              <h3 style={{
+                fontFamily: "var(--font-unbounded)",
+                fontWeight: 900,
+                fontSize: "clamp(1.4rem,2.5vw,2rem)",
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                color: "#eef1e6",
+                marginBottom: "0.5rem",
+              }}>
+                {c.title}
+              </h3>
+
+              {/* Client + year */}
+              <p style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.62rem",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "rgba(238,241,230,0.35)",
+                marginBottom: "2rem",
+              }}>
+                {c.client} · {c.year}
+              </p>
+
+              {/* Description */}
+              <p style={{
+                fontFamily: "var(--font-dm-sans)",
+                fontSize: "1rem",
+                color: "rgba(238,241,230,0.6)",
+                lineHeight: 1.75,
+                maxWidth: "32rem",
+                marginBottom: "2rem",
+              }}>
+                {c.description}
+              </p>
+
+              {/* Tags */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {c.tags.map((t) => (
+                  <span key={t} style={{
+                    fontFamily: "var(--font-unbounded)",
+                    fontSize: "0.55rem",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    padding: "0.3rem 0.8rem",
+                    border: "1px solid rgba(238,241,230,0.12)",
+                    borderRadius: "2px",
+                    color: "rgba(238,241,230,0.45)",
+                  }}>
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div style={{ marginTop: "2.5rem" }}>
+              <span style={{
+                fontFamily: "var(--font-unbounded)",
+                fontSize: "0.6rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(238,241,230,0.25)",
+              }}>
+                Full case study coming soon ↗
+              </span>
+            </div>
+          </div>
+        </article>
+      ))}
     </section>
   );
 }

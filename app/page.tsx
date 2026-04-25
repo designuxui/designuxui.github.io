@@ -1,22 +1,22 @@
-import About from "@/app/components/sections/About";
-import Cases from "@/app/components/sections/Cases";
-import Contact from "@/app/components/sections/Contact";
-import Hero from "@/app/components/sections/Hero";
-import MarketplacePreview from "@/app/components/sections/MarketplacePreview";
-import Results from "@/app/components/sections/Results";
-import Services from "@/app/components/sections/Services";
-import Ticker from "@/app/components/sections/Ticker";
+import Hero from "./components/sections/Hero";
+import AboutStrip from "./components/sections/AboutStrip";
+import Services from "./components/sections/Services";
+import Cases from "./components/sections/Cases";
+import Clients from "./components/sections/Clients";
+import Results from "./components/sections/Results";
+import Contact from "./components/sections/Contact";
+import Ticker from "./components/sections/Ticker";
 
 export default function Home() {
   return (
     <main>
       <Hero />
       <Ticker />
-      <Results />
+      <AboutStrip />
       <Services />
       <Cases />
-      <MarketplacePreview />
-      <About />
+      <Clients />
+      <Results />
       <Contact />
     </main>
   );
